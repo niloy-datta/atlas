@@ -46,3 +46,37 @@ Recovery always returns `202 Accepted` for a valid email-shaped request, whether
 | PATCH | `/api/v1/admin/organizations/{organizationId}/verification` | Platform admin | Apply an allowed verification transition |
 
 Unknown and cross-tenant organization identifiers deliberately return the same not-found response. Client-provided organization identifiers select a resource but never establish authorization.
+
+## SkillProof endpoints
+
+| Method | Path | Authorization | Purpose |
+| --- | --- | --- | --- |
+| GET | `/api/v1/skills/categories` | Public | List active skill categories |
+| GET | `/api/v1/skills` | Public | Search active catalogue skills |
+| POST | `/api/v1/admin/skill-categories` | Platform admin | Create a category |
+| POST | `/api/v1/admin/skills` | Platform admin | Create a skill |
+| PATCH | `/api/v1/admin/skills/{skillId}/active` | Platform admin | Activate or deactivate a skill |
+| GET/POST | `/api/v1/workers/me/skills` | Worker | List or declare worker skills |
+| PATCH/DELETE | `/api/v1/workers/me/skills/{workerSkillId}` | Owning worker | Change proficiency or remove an unverified skill |
+| POST | `/api/v1/workers/me/skills/{workerSkillId}/evidence` | Owning worker | Submit verification evidence |
+| PATCH | `/api/v1/admin/worker-skills/{workerSkillId}/verification` | Platform admin | Verify, reject, or revoke through an allowed transition |
+| POST | `/api/v1/worker-skills/{workerSkillId}/endorsements` | Authenticated non-owner | Endorse a verified skill once |
+
+Evidence references are returned only through private worker/admin flows. Public catalogue responses contain no worker evidence or account data.
+
+## Credential endpoints
+
+| Method | Path | Authorization | Purpose |
+| --- | --- | --- | --- |
+| GET/POST | `/api/v1/workers/me/credentials` | Worker | List or create worker-owned credential metadata |
+| GET/PUT/DELETE | `/api/v1/workers/me/credentials/{credentialId}` | Owning worker | Read, version-replace, or delete an eligible credential |
+| POST | `/api/v1/workers/me/credentials/{credentialId}/uploads` | Owning worker | Create a short-lived signed upload authorization |
+| POST | `/api/v1/workers/me/credentials/{credentialId}/documents/{documentId}/complete` | Owning worker | Inspect file size, signature, and malware status |
+| POST | `/api/v1/workers/me/credentials/{credentialId}/submit` | Owning worker | Submit a clean credential for review |
+| PATCH | `/api/v1/admin/credentials/{credentialId}/verification` | Platform admin | Verify, reject, or revoke through an allowed transition |
+| POST | `/api/v1/workers/me/credentials/{credentialId}/shares` | Owning worker | Grant temporary private access to another user |
+| DELETE | `/api/v1/workers/me/credentials/shares/{shareId}` | Grant owner | Revoke a sharing grant |
+| GET | `/api/v1/credential-documents/{documentId}/download` | Owner or active grantee | Create a short-lived signed download authorization |
+| GET | `/api/v1/public/credentials/{credentialId}` | Public | Read the allow-listed summary of a verified public credential |
+
+Database responses never include storage object keys. Document access is authorized by the application before a temporary signed URL is created. Public summaries exclude credential numbers, documents, worker account identifiers, and verification evidence.

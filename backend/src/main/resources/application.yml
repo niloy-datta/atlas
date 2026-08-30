@@ -55,6 +55,14 @@ atlas:
     recovery-limit: ${ATLAS_RECOVERY_LIMIT:5}
     rate-limit-window: 15m
     password-reset-url: ${ATLAS_PASSWORD_RESET_URL:http://localhost:3000/reset-password}
+  credential-storage:
+    enabled: ${ATLAS_CREDENTIAL_STORAGE_ENABLED:true}
+    endpoint: ${ATLAS_MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${ATLAS_MINIO_ACCESS_KEY:atlas-local}
+    secret-key: ${ATLAS_MINIO_SECRET_KEY:atlas-local-secret-change-me}
+    bucket: ${ATLAS_MINIO_BUCKET:atlas-credentials}
+    maximum-file-size: ${ATLAS_CREDENTIAL_MAX_FILE_SIZE:10MB}
+    signed-url-ttl: ${ATLAS_CREDENTIAL_SIGNED_URL_TTL:5m}
 
 server:
   port: ${BACKEND_PORT:8080}

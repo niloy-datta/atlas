@@ -53,9 +53,31 @@ services:
     networks:
       - atlas
 
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${ATLAS_MINIO_ACCESS_KEY:-atlas-local}
+      MINIO_ROOT_PASSWORD: ${ATLAS_MINIO_SECRET_KEY:-atlas-local-secret-change-me}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - atlas_minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - atlas
+
 volumes:
   atlas_postgres_data:
   atlas_redis_data:
+  atlas_minio_data:
 
 networks:
   atlas:

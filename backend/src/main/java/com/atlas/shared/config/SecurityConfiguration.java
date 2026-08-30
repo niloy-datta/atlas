@@ -58,8 +58,12 @@ public class SecurityConfiguration {
                                 "/api/v1/auth/password-recovery",
                                 "/api/v1/auth/password-reset").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/work-pass/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/skills", "/api/v1/skills/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/public/credentials/*").permitAll()
                         .requestMatchers("/api/v1/workers/me/**").hasRole("WORKER")
-                        .requestMatchers("/api/v1/admin/organizations/**").hasRole("PLATFORM_ADMIN")
+                        .requestMatchers("/api/v1/admin/**").hasRole("PLATFORM_ADMIN")
+                        .requestMatchers("/api/v1/credential-documents/**").authenticated()
+                        .requestMatchers("/api/v1/worker-skills/**").authenticated()
                         .requestMatchers("/api/v1/organizations/**")
                         .hasAnyRole("EMPLOYER_ADMIN", "EMPLOYER_MEMBER")
                         .requestMatchers("/api/v1/auth/**").authenticated()

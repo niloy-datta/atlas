@@ -30,6 +30,8 @@
 		<java.version>25</java.version>
 		<bouncycastle.version>1.85.2</bouncycastle.version>
 		<springdoc.version>3.1.0</springdoc.version>
+		<minio.version>9.0.1</minio.version>
+		<okhttp.version>5.3.2</okhttp.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -92,6 +94,16 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
 			<version>${springdoc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>${minio.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp-jvm</artifactId>
+			<version>${okhttp.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -1,5 +1,11 @@
 package com.atlas;
 
+import com.atlas.credential.storage.CredentialStorage;
+import com.atlas.credential.storage.CredentialStorageException;
+import java.net.URI;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +28,37 @@ public class TestcontainersConfiguration {
 	@ServiceConnection(name = "redis")
 	GenericContainer<?> redisContainer() {
 		return new GenericContainer<>(DockerImageName.parse("redis:8.2.9-alpine")).withExposedPorts(6379);
+	}
+
+	@Bean
+	InMemoryCredentialStorage credentialStorage() {
+		return new InMemoryCredentialStorage();
+	}
+
+	public static final class InMemoryCredentialStorage implements CredentialStorage {
+		private final Map<String, byte[]> objects = new ConcurrentHashMap<>();
+
+		@Override
+		public URI createUploadUrl(String objectKey, String contentType, Duration lifetime) {
+			return URI.create("https://storage.test/upload/" + objectKey + "?ttl=" + lifetime.toSeconds());
+		}
+
+		@Override
+		public URI createDownloadUrl(String objectKey, Duration lifetime) {
+			return URI.create("https://storage.test/download/" + objectKey + "?ttl=" + lifetime.toSeconds());
+		}
+
+		@Override
+		public StoredObject inspect(String objectKey, int prefixLength) {
+			byte[] value = objects.get(objectKey);
+			if (value == null) throw new CredentialStorageException("Object not found", new IllegalStateException());
+			return new StoredObject(value.length, java.util.Arrays.copyOf(value, Math.min(value.length, prefixLength)));
+		}
+
+		@Override
+		public void delete(String objectKey) { objects.remove(objectKey); }
+
+		public void put(String objectKey, byte[] value) { objects.put(objectKey, value.clone()); }
 	}
 
 }
