@@ -1,0 +1,84 @@
+spring:
+  config:
+    import: optional:file:../.env[.properties]
+  application:
+    name: atlas-backend
+  autoconfigure:
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+  datasource:
+    url: ${ATLAS_DB_URL:jdbc:postgresql://localhost:5432/atlas}
+    username: ${ATLAS_DB_USER:atlas}
+    password: ${ATLAS_DB_PASSWORD:atlas-local-only}
+    hikari:
+      maximum-pool-size: ${ATLAS_DB_POOL_SIZE:10}
+      connection-timeout: 3000
+  flyway:
+    enabled: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  data:
+    redis:
+      repositories:
+        enabled: false
+      host: ${ATLAS_REDIS_HOST:localhost}
+      port: ${ATLAS_REDIS_PORT:6379}
+      timeout: 2s
+  mail:
+    host: ${ATLAS_MAIL_HOST:localhost}
+    port: ${ATLAS_MAIL_PORT:1025}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+atlas:
+  auth:
+    issuer: ${ATLAS_AUTH_ISSUER:http://localhost:8080}
+    audience: ${ATLAS_AUTH_AUDIENCE:atlas-web}
+    access-token-ttl: 10m
+    refresh-token-ttl: 30d
+    password-reset-ttl: 30m
+    jwt-secret: ${ATLAS_JWT_SECRET:YXR0bGFzLWxvY2FsLWp3dC1zZWNyZXQtMzItYnl0ZXMtbWluaW11bQ==}
+    token-hash-secret: ${ATLAS_TOKEN_HASH_SECRET:YXR0bGFzLWxvY2FsLWhhc2gtc2VjcmV0LTMyLWJ5dGVzLW1pbmltdW0=}
+    allowed-origins: ${ATLAS_ALLOWED_ORIGINS:http://localhost:3000}
+    secure-cookies: ${ATLAS_SECURE_COOKIES:false}
+    login-limit: ${ATLAS_LOGIN_LIMIT:10}
+    recovery-limit: ${ATLAS_RECOVERY_LIMIT:5}
+    rate-limit-window: 15m
+    password-reset-url: ${ATLAS_PASSWORD_RESET_URL:http://localhost:3000/reset-password}
+
+server:
+  port: ${BACKEND_PORT:8080}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: ATLAS Backend
+    version: 0.0.1-SNAPSHOT
+    api-version: v1
