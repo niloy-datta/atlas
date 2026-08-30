@@ -20,3 +20,29 @@ All public API routes use `/api/v1`, JSON camelCase fields, UUID identifiers, UT
 Successful registration, login, and refresh responses return the 10-minute access token in JSON. The 30-day opaque refresh token is set only in the `atlas_refresh` HttpOnly cookie. Browser clients read the non-HttpOnly `atlas_csrf` cookie and echo it in `X-CSRF-TOKEN` for refresh and logout. Access tokens must remain in memory.
 
 Recovery always returns `202 Accepted` for a valid email-shaped request, whether or not an account exists. Local reset emails appear in Mailpit at `http://localhost:8025`.
+
+## Worker profile endpoints
+
+| Method | Path | Authentication | Purpose |
+| --- | --- | --- | --- |
+| GET | `/api/v1/workers/me/profile` | Worker bearer JWT | Read the private profile |
+| PUT | `/api/v1/workers/me/profile` | Worker bearer JWT | Replace the allow-listed profile using its version |
+| GET | `/api/v1/workers/me/work-pass` | Worker bearer JWT | Read the private WorkPass |
+| GET | `/api/v1/work-pass/{handle}` | Public | Read a public, privacy-filtered WorkPass |
+
+## Organization endpoints
+
+| Method | Path | Authorization | Purpose |
+| --- | --- | --- | --- |
+| POST/GET | `/api/v1/organizations` | Employer bearer JWT | Create or list caller memberships |
+| GET/PUT | `/api/v1/organizations/{organizationId}` | Tenant policy | Read or version-replace the organization profile |
+| GET | `/api/v1/organizations/{organizationId}/members` | Organization member | List members |
+| PATCH | `/api/v1/organizations/{organizationId}/members/{memberId}/role` | Member-management permission | Change a member role |
+| DELETE | `/api/v1/organizations/{organizationId}/members/{memberId}` | Member-management permission | Remove a member |
+| POST | `/api/v1/organizations/{organizationId}/invitations` | Member-management permission | Invite a member |
+| POST | `/api/v1/organizations/invitations/{invitationId}/accept` | Matching authenticated email | Accept an invitation |
+| POST/GET | `/api/v1/organizations/{organizationId}/locations` | Tenant policy | Create or list PostGIS locations |
+| POST | `/api/v1/organizations/{organizationId}/verification-request` | Profile-management permission | Move from unverified to pending |
+| PATCH | `/api/v1/admin/organizations/{organizationId}/verification` | Platform admin | Apply an allowed verification transition |
+
+Unknown and cross-tenant organization identifiers deliberately return the same not-found response. Client-provided organization identifiers select a resource but never establish authorization.

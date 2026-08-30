@@ -8,7 +8,7 @@ ATLAS is a production-oriented workforce platform for portable verified worker i
 
 ## Current status
 
-Phases 0–2 establish the repository, platform foundation, and production-oriented identity boundary. Worker and employer registration, login, JWT access, rotating refresh-token families, session revocation, password recovery/reset, security auditing, CSRF/origin protection, and generated OpenAPI are implemented.
+Phases 0–4 establish the repository, platform foundation, identity boundary, private/public WorkPass, and tenant-isolated organizations. Worker profiles, PostGIS locations, deterministic completion, organization membership, invitations, action-based permissions, owner invariants, and platform verification transitions are implemented alongside the authentication and session controls.
 
 The frontend is intentionally a neutral structural shell. Final UI implementation will follow the design supplied by the product owner.
 
@@ -51,5 +51,7 @@ Run `pwsh ./scripts/verify.ps1` from the repository root. The script validates C
 - [Architecture decision index](docs/adr/README.md)
 - [Phase 1 completion report](docs/implementation/phase-01-completion.md)
 - [Phase 2 completion report](docs/implementation/phase-02-completion.md)
+- [Phase 3 completion report](docs/implementation/phase-03-completion.md)
+- [Phase 4 completion report](docs/implementation/phase-04-completion.md)
 
 No throughput, availability, latency, user-count, or scale claim is made without saved benchmark evidence.
