@@ -13,7 +13,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.atlas.identity.domain.AtlasPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,36 +33,36 @@ public class WorkerSkillController {
     }
 
     @GetMapping
-    List<SkillService.WorkerSkillView> list(@AuthenticationPrincipal Jwt jwt) {
-        return skills.workerSkills(userId(jwt));
+    List<SkillService.WorkerSkillView> list(@AuthenticationPrincipal AtlasPrincipal principal) {
+        return skills.workerSkills(userId(principal));
     }
 
     @PostMapping
-    ResponseEntity<SkillService.WorkerSkillView> declare(@AuthenticationPrincipal Jwt jwt,
+    ResponseEntity<SkillService.WorkerSkillView> declare(@AuthenticationPrincipal AtlasPrincipal principal,
                                                          @Valid @RequestBody DeclarationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(skills.declare(userId(jwt), request.skillId(), request.proficiency()));
+                .body(skills.declare(userId(principal), request.skillId(), request.proficiency()));
     }
 
     @PatchMapping("/{workerSkillId}")
-    SkillService.WorkerSkillView update(@PathVariable UUID workerSkillId, @AuthenticationPrincipal Jwt jwt,
+    SkillService.WorkerSkillView update(@PathVariable UUID workerSkillId, @AuthenticationPrincipal AtlasPrincipal principal,
                                         @Valid @RequestBody ProficiencyRequest request) {
-        return skills.updateProficiency(userId(jwt), workerSkillId, request.version(), request.proficiency());
+        return skills.updateProficiency(userId(principal), workerSkillId, request.version(), request.proficiency());
     }
 
     @DeleteMapping("/{workerSkillId}")
-    ResponseEntity<Void> remove(@PathVariable UUID workerSkillId, @AuthenticationPrincipal Jwt jwt) {
-        skills.remove(userId(jwt), workerSkillId);
+    ResponseEntity<Void> remove(@PathVariable UUID workerSkillId, @AuthenticationPrincipal AtlasPrincipal principal) {
+        skills.remove(userId(principal), workerSkillId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{workerSkillId}/evidence")
-    SkillService.WorkerSkillView submitEvidence(@PathVariable UUID workerSkillId, @AuthenticationPrincipal Jwt jwt,
+    SkillService.WorkerSkillView submitEvidence(@PathVariable UUID workerSkillId, @AuthenticationPrincipal AtlasPrincipal principal,
                                                 @Valid @RequestBody EvidenceRequest request) {
-        return skills.submitEvidence(userId(jwt), workerSkillId, request.evidenceType(), request.evidenceReference());
+        return skills.submitEvidence(userId(principal), workerSkillId, request.evidenceType(), request.evidenceReference());
     }
 
-    private static UUID userId(Jwt jwt) { return UUID.fromString(jwt.getSubject()); }
+    private static UUID userId(AtlasPrincipal principal) { return principal.requireUserId(); }
 
     public record DeclarationRequest(@NotNull UUID skillId, @NotNull SkillProficiency proficiency) { }
     public record ProficiencyRequest(@Min(0) long version, @NotNull SkillProficiency proficiency) { }

@@ -8,10 +8,14 @@ export const metadata: Metadata = {
     "The structural frontend foundation for ATLAS. Final product UI follows the approved design handoff.",
 };
 
+import { AuthProvider } from "../context/AuthContext";
+
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" className="h-full">
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

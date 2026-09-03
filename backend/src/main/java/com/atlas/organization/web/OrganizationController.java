@@ -21,7 +21,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.atlas.identity.domain.AtlasPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -42,80 +42,80 @@ public class OrganizationController {
     }
 
     @PostMapping
-    ResponseEntity<OrganizationService.OrganizationView> create(@AuthenticationPrincipal Jwt jwt,
+    ResponseEntity<OrganizationService.OrganizationView> create(@AuthenticationPrincipal AtlasPrincipal principal,
                                                                  @Valid @RequestBody OrganizationRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(organizations.create(userId(jwt), request.name(),
+        return ResponseEntity.status(HttpStatus.CREATED).body(organizations.create(userId(principal), request.name(),
                 request.slug(), request.description()));
     }
 
     @GetMapping
-    List<OrganizationSummary> list(@AuthenticationPrincipal Jwt jwt) {
-        return organizations.list(userId(jwt));
+    List<OrganizationSummary> list(@AuthenticationPrincipal AtlasPrincipal principal) {
+        return organizations.list(userId(principal));
     }
 
     @GetMapping("/{organizationId}")
-    OrganizationService.OrganizationView get(@PathVariable UUID organizationId, @AuthenticationPrincipal Jwt jwt) {
-        return organizations.get(organizationId, userId(jwt));
+    OrganizationService.OrganizationView get(@PathVariable UUID organizationId, @AuthenticationPrincipal AtlasPrincipal principal) {
+        return organizations.get(organizationId, userId(principal));
     }
 
     @PutMapping("/{organizationId}")
-    OrganizationService.OrganizationView update(@PathVariable UUID organizationId, @AuthenticationPrincipal Jwt jwt,
+    OrganizationService.OrganizationView update(@PathVariable UUID organizationId, @AuthenticationPrincipal AtlasPrincipal principal,
                                                 @Valid @RequestBody OrganizationUpdateRequest request) {
-        return organizations.update(organizationId, userId(jwt), request.version(), request.name(), request.slug(),
+        return organizations.update(organizationId, userId(principal), request.version(), request.name(), request.slug(),
                 request.description());
     }
 
     @GetMapping("/{organizationId}/members")
-    List<MemberRow> members(@PathVariable UUID organizationId, @AuthenticationPrincipal Jwt jwt) {
-        return organizations.members(organizationId, userId(jwt));
+    List<MemberRow> members(@PathVariable UUID organizationId, @AuthenticationPrincipal AtlasPrincipal principal) {
+        return organizations.members(organizationId, userId(principal));
     }
 
     @PatchMapping("/{organizationId}/members/{memberId}/role")
     List<MemberRow> changeRole(@PathVariable UUID organizationId, @PathVariable UUID memberId,
-                               @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody RoleRequest request) {
-        return organizations.changeRole(organizationId, userId(jwt), memberId, request.role());
+                               @AuthenticationPrincipal AtlasPrincipal principal, @Valid @RequestBody RoleRequest request) {
+        return organizations.changeRole(organizationId, userId(principal), memberId, request.role());
     }
 
     @DeleteMapping("/{organizationId}/members/{memberId}")
     ResponseEntity<Void> removeMember(@PathVariable UUID organizationId, @PathVariable UUID memberId,
-                                      @AuthenticationPrincipal Jwt jwt) {
-        organizations.removeMember(organizationId, userId(jwt), memberId);
+                                      @AuthenticationPrincipal AtlasPrincipal principal) {
+        organizations.removeMember(organizationId, userId(principal), memberId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{organizationId}/invitations")
-    ResponseEntity<InvitationRow> invite(@PathVariable UUID organizationId, @AuthenticationPrincipal Jwt jwt,
+    ResponseEntity<InvitationRow> invite(@PathVariable UUID organizationId, @AuthenticationPrincipal AtlasPrincipal principal,
                                          @Valid @RequestBody InvitationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(organizations.invite(organizationId, userId(jwt), request.email(), request.role()));
+                .body(organizations.invite(organizationId, userId(principal), request.email(), request.role()));
     }
 
     @PostMapping("/invitations/{invitationId}/accept")
-    OrganizationService.OrganizationView accept(@PathVariable UUID invitationId, @AuthenticationPrincipal Jwt jwt) {
-        return organizations.acceptInvitation(invitationId, userId(jwt));
+    OrganizationService.OrganizationView accept(@PathVariable UUID invitationId, @AuthenticationPrincipal AtlasPrincipal principal) {
+        return organizations.acceptInvitation(invitationId, userId(principal));
     }
 
     @PostMapping("/{organizationId}/locations")
-    ResponseEntity<LocationRow> createLocation(@PathVariable UUID organizationId, @AuthenticationPrincipal Jwt jwt,
+    ResponseEntity<LocationRow> createLocation(@PathVariable UUID organizationId, @AuthenticationPrincipal AtlasPrincipal principal,
                                                @Valid @RequestBody LocationRequest request) {
         LocationCommand command = new LocationCommand(request.name(), request.latitude(), request.longitude(),
                 request.addressLine(), request.city(), request.region(), request.countryCode());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(organizations.createLocation(organizationId, userId(jwt), command));
+                .body(organizations.createLocation(organizationId, userId(principal), command));
     }
 
     @GetMapping("/{organizationId}/locations")
-    List<LocationRow> locations(@PathVariable UUID organizationId, @AuthenticationPrincipal Jwt jwt) {
-        return organizations.locations(organizationId, userId(jwt));
+    List<LocationRow> locations(@PathVariable UUID organizationId, @AuthenticationPrincipal AtlasPrincipal principal) {
+        return organizations.locations(organizationId, userId(principal));
     }
 
     @PostMapping("/{organizationId}/verification-request")
     OrganizationService.OrganizationView requestVerification(@PathVariable UUID organizationId,
-                                                              @AuthenticationPrincipal Jwt jwt) {
-        return organizations.requestVerification(organizationId, userId(jwt));
+                                                              @AuthenticationPrincipal AtlasPrincipal principal) {
+        return organizations.requestVerification(organizationId, userId(principal));
     }
 
-    private static UUID userId(Jwt jwt) { return UUID.fromString(jwt.getSubject()); }
+    private static UUID userId(AtlasPrincipal principal) { return principal.requireUserId(); }
 
     public record OrganizationRequest(
             @NotBlank @Size(max = 160) String name,

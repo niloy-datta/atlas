@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.atlas.identity.domain.AtlasPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,12 +34,12 @@ public class WorkerProfileController {
     public WorkerProfileController(WorkerProfileService profiles) { this.profiles = profiles; }
 
     @GetMapping("/profile")
-    WorkerProfileService.PrivateProfile profile(@AuthenticationPrincipal Jwt jwt) {
-        return profiles.privateProfile(userId(jwt));
+    WorkerProfileService.PrivateProfile profile(@AuthenticationPrincipal AtlasPrincipal principal) {
+        return profiles.privateProfile(userId(principal));
     }
 
     @PutMapping("/profile")
-    WorkerProfileService.PrivateProfile replace(@AuthenticationPrincipal Jwt jwt,
+    WorkerProfileService.PrivateProfile replace(@AuthenticationPrincipal AtlasPrincipal principal,
                                                 @Valid @RequestBody ProfileRequest request) {
         LocationWrite location = request.location() == null ? null : new LocationWrite(
                 request.location().latitude(), request.location().longitude(), trim(request.location().city()),
@@ -49,17 +49,17 @@ public class WorkerProfileController {
                 request.preferences().jobTypes() == null ? List.of() : List.copyOf(request.preferences().jobTypes()));
         PrivacyWrite privacy = request.privacy() == null ? null : new PrivacyWrite(
                 request.privacy().showCoarseLocation(), request.privacy().showExperience());
-        return profiles.replace(userId(jwt), new ProfileCommand(request.version(), request.handle(), request.fullName(),
+        return profiles.replace(userId(principal), new ProfileCommand(request.version(), request.handle(), request.fullName(),
                 request.headline(), request.bio(), request.experienceYears(), request.visibility(),
                 location, preferences, privacy));
     }
 
     @GetMapping("/work-pass")
-    WorkerProfileService.PrivateWorkPass workPass(@AuthenticationPrincipal Jwt jwt) {
-        return profiles.privateWorkPass(userId(jwt));
+    WorkerProfileService.PrivateWorkPass workPass(@AuthenticationPrincipal AtlasPrincipal principal) {
+        return profiles.privateWorkPass(userId(principal));
     }
 
-    private static UUID userId(Jwt jwt) { return UUID.fromString(jwt.getSubject()); }
+    private static UUID userId(AtlasPrincipal principal) { return principal.requireUserId(); }
     private static String trim(String value) { return value == null ? null : value.trim(); }
 
     public record ProfileRequest(

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
+  const { firebaseUser, atlasUser, signOut } = useAuth();
   const [composerInput, setComposerInput] = useState("");
   const [activeMode, setActiveMode] = useState<"text" | "speak" | "photo">("text");
 
@@ -42,7 +45,7 @@ export default function Home() {
   <header className="navbar">
     <div className="nav-container">
       <div className="nav-left">
-        <a href="#" className="brand-logo">
+        <Link href="/" className="brand-logo">
           <svg className="logo-icon" viewBox="0 0 32 32" fill="none">
             <circle cx="10" cy="16" r="6" fill="#FF5A1F"/>
             <circle cx="22" cy="10" r="4" fill="#0F172A"/>
@@ -51,7 +54,7 @@ export default function Home() {
             <line x1="14.5" y1="18.5" x2="18.5" y2="20.5" stroke="#0F172A" strokeWidth="2"/>
           </svg>
           <span className="logo-text">SkillHub</span>
-        </a>
+        </Link>
         <nav className="nav-links">
           <a href="#services" className="nav-link">Services</a>
           <a href="#shifts" className="nav-link">Shifts</a>
@@ -71,8 +74,28 @@ export default function Home() {
           <span>EN</span>
           <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-        <a href="#login" className="btn-text">Log in</a>
-        <a href="#start" className="btn-primary">Get started</a>
+        {firebaseUser ? (
+          <div className="flex items-center gap-3">
+            <div className="user-badge" data-testid="user-profile-badge">
+              <span>{atlasUser?.email || firebaseUser.email}</span>
+              {atlasUser?.roles?.[0] && (
+                <span className="role-tag">{atlasUser.roles[0].replace("ROLE_", "")}</span>
+              )}
+            </div>
+            <button
+              onClick={() => signOut()}
+              className="btn-text"
+              data-testid="logout-button"
+            >
+              Log out
+            </button>
+          </div>
+        ) : (
+          <>
+            <Link href="/login" className="btn-text">Log in</Link>
+            <Link href="/register" className="btn-primary">Get started</Link>
+          </>
+        )}
       </div>
     </div>
   </header>
@@ -123,7 +146,7 @@ export default function Home() {
             <span className="pathway-arrow">&rsaquo;</span>
           </div>
 
-          <div className="pathway-card blue">
+          <Link href="/register?role=employer" className="pathway-card blue">
             <div className="pathway-icon">
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="#2563EB" strokeWidth="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
@@ -132,9 +155,9 @@ export default function Home() {
               <p>Fill shifts fast with verified local workers</p>
             </div>
             <span className="pathway-arrow">&rsaquo;</span>
-          </div>
+          </Link>
 
-          <div className="pathway-card green">
+          <Link href="/register?role=worker" className="pathway-card green">
             <div className="pathway-icon">
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="#059669" strokeWidth="2" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
@@ -143,7 +166,7 @@ export default function Home() {
               <p>Discover shifts and build your career</p>
             </div>
             <span className="pathway-arrow">&rsaquo;</span>
-          </div>
+          </Link>
         </div>
 
         {/* Live Indicators */}
@@ -434,7 +457,7 @@ export default function Home() {
               <div className="meta-item"><span className="meta-label">💳 Payment</span><span>Paid Friday</span></div>
             </div>
 
-            <button className="btn-blue-action" onClick={handleShiftApply}>I'm interested</button>
+            <button className="btn-blue-action" onClick={handleShiftApply}>I&apos;m interested</button>
           </div>
         </div>
 
@@ -591,7 +614,7 @@ export default function Home() {
       <div className="reviews-grid">
         <div className="review-card">
           <div className="stars">★★★★★</div>
-          <p className="review-text">"Booked a plumber at 8am, fixed by 10am. Brilliant experience."</p>
+          <p className="review-text">&ldquo;Booked a plumber at 8am, fixed by 10am. Brilliant experience.&rdquo;</p>
           <div className="reviewer">
             <img src="/assets/daniel_morgan.jpg" alt="James W." className="reviewer-img" />
             <div>
@@ -603,7 +626,7 @@ export default function Home() {
 
         <div className="review-card">
           <div className="stars">★★★★★</div>
-          <p className="review-text">"I fill shifts fast and the payments are always on time. Great platform."</p>
+          <p className="review-text">&ldquo;I fill shifts fast and the payments are always on time. Great platform.&rdquo;</p>
           <div className="reviewer">
             <img src="/assets/maria_santos.jpg" alt="Maria S." className="reviewer-img" />
             <div>
@@ -615,7 +638,7 @@ export default function Home() {
 
         <div className="review-card">
           <div className="stars">★★★★★</div>
-          <p className="review-text">"SkillHub helps us run a tight operation with less stress and lower no-show rates."</p>
+          <p className="review-text">&ldquo;SkillHub helps us run a tight operation with less stress and lower no-show rates.&rdquo;</p>
           <div className="reviewer">
             <div className="reviewer-logo">SOHO<br />CAFÉ</div>
             <div>

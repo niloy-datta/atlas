@@ -10,7 +10,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.atlas.identity.domain.AtlasPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,9 +27,9 @@ public class SkillEndorsementController {
     }
 
     @PostMapping("/{workerSkillId}/endorsements")
-    ResponseEntity<EndorsementRow> endorse(@PathVariable UUID workerSkillId, @AuthenticationPrincipal Jwt jwt,
+    ResponseEntity<EndorsementRow> endorse(@PathVariable UUID workerSkillId, @AuthenticationPrincipal AtlasPrincipal principal,
                                            @Valid @RequestBody EndorsementRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(skills.endorse(UUID.fromString(jwt.getSubject()),
+        return ResponseEntity.status(HttpStatus.CREATED).body(skills.endorse(principal.requireUserId(),
                 workerSkillId, request.relationship(), request.comment()));
     }
 

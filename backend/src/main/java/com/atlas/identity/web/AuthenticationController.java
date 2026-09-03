@@ -23,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -102,21 +101,43 @@ public class AuthenticationController {
         return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
     }
 
+    @PostMapping("/bootstrap")
+    ResponseEntity<BootstrapResponse> bootstrap(@Valid @RequestBody BootstrapRequest request,
+                                                @AuthenticationPrincipal com.atlas.identity.domain.AtlasPrincipal principal,
+                                                HttpServletRequest servletRequest) {
+        if (principal == null) {
+            throw new ApiProblemException(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED",
+                    "Unauthenticated", "Valid Firebase identity token is required.");
+        }
+        var result = authentication.bootstrap(principal, request.accountType(), metadata(servletRequest));
+        return ResponseEntity.status(result.created() ? HttpStatus.CREATED : HttpStatus.OK)
+                .body(new BootstrapResponse(result.user(), result.created()));
+    }
+
     @GetMapping("/me")
-    AuthenticationService.CurrentUser me(@AuthenticationPrincipal Jwt jwt) {
-        return authentication.currentUser(UUID.fromString(jwt.getSubject()));
+    AuthenticationService.CurrentUser me(@AuthenticationPrincipal com.atlas.identity.domain.AtlasPrincipal principal) {
+        if (principal == null || principal.userId() == null) {
+            throw new ApiProblemException(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED",
+                    "Unauthenticated", "Atlas user account is not provisioned. Please complete bootstrap.");
+        }
+        return authentication.currentUser(principal.userId());
     }
 
     @GetMapping("/sessions")
-    List<AuthenticationService.SessionView> sessions(@AuthenticationPrincipal Jwt jwt) {
-        return authentication.sessions(UUID.fromString(jwt.getSubject()),
-                UUID.fromString(jwt.getClaimAsString("sessionId")));
+    List<AuthenticationService.SessionView> sessions(@AuthenticationPrincipal com.atlas.identity.domain.AtlasPrincipal principal) {
+        if (principal == null || principal.userId() == null) {
+            return List.of();
+        }
+        return authentication.sessions(principal.userId(), null);
     }
 
     @DeleteMapping("/sessions/{sessionId}")
-    ResponseEntity<Void> revokeSession(@PathVariable UUID sessionId, @AuthenticationPrincipal Jwt jwt,
+    ResponseEntity<Void> revokeSession(@PathVariable UUID sessionId,
+                                       @AuthenticationPrincipal com.atlas.identity.domain.AtlasPrincipal principal,
                                        HttpServletRequest request) {
-        authentication.revokeSession(UUID.fromString(jwt.getSubject()), sessionId, metadata(request));
+        if (principal != null && principal.userId() != null) {
+            authentication.revokeSession(principal.userId(), sessionId, metadata(request));
+        }
         return ResponseEntity.noContent().build();
     }
 
@@ -155,6 +176,16 @@ public class AuthenticationController {
         return new ApiProblemException(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_FAILED",
                 "Authentication failed", "Refresh token is missing.");
     }
+
+    public record BootstrapRequest(
+            @NotBlank
+            @jakarta.validation.constraints.Pattern(regexp = "(?i)^(worker|employer)$", message = "accountType must be either 'worker' or 'employer'")
+            String accountType
+    ) {}
+    public record BootstrapResponse(
+            AuthenticationService.CurrentUser user,
+            boolean created
+    ) {}
 
     public record CredentialsRequest(
             @NotBlank @Email @Size(max = 320) String email,

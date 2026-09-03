@@ -27,8 +27,11 @@ public class UserAccount {
     @Column(name = "email_display", nullable = false, length = 320)
     private String emailDisplay;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    @Column(name = "firebase_uid", length = 128, unique = true)
+    private String firebaseUid;
 
     @Column(nullable = false)
     private boolean enabled;
@@ -62,12 +65,33 @@ public class UserAccount {
         return user;
     }
 
+    public static UserAccount createWithFirebase(String firebaseUid, String displayEmail, String normalizedEmail,
+                                                 PlatformRole role, Instant now) {
+        UserAccount user = new UserAccount();
+        user.id = UUID.randomUUID();
+        user.firebaseUid = firebaseUid;
+        user.emailDisplay = displayEmail;
+        user.emailNormalized = normalizedEmail;
+        user.passwordHash = null;
+        user.enabled = true;
+        user.roles.add(role);
+        user.createdAt = now;
+        user.updatedAt = now;
+        return user;
+    }
+
     public UUID id() { return id; }
     public String emailNormalized() { return emailNormalized; }
     public String emailDisplay() { return emailDisplay; }
     public String passwordHash() { return passwordHash; }
+    public String firebaseUid() { return firebaseUid; }
     public boolean enabled() { return enabled; }
     public Set<PlatformRole> roles() { return Set.copyOf(roles); }
+
+    public void linkFirebaseUid(String firebaseUid, Instant now) {
+        this.firebaseUid = firebaseUid;
+        this.updatedAt = now;
+    }
 
     public void changePassword(String newHash, Instant now) {
         passwordHash = newHash;

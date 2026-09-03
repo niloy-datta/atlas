@@ -173,6 +173,62 @@ public class AuthenticationService {
         audit.record(user.id(), "PASSWORD_RESET", "SUCCESS", user.id(), metadata.ipAddress(), metadata.userAgent());
     }
 
+    @Transactional
+    public BootstrapResult bootstrap(com.atlas.identity.domain.AtlasPrincipal principal, String requestedAccountType, RequestMetadata metadata) {
+        String firebaseUid = principal.firebaseUid();
+        if (firebaseUid == null || firebaseUid.isBlank()) {
+            throw new ApiProblemException(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED",
+                    "Unauthenticated", "Valid Firebase identity is required to bootstrap.");
+        }
+
+        // 1. Check if user already linked with this firebaseUid
+        Optional<UserAccount> existingByUid = users.findByFirebaseUid(firebaseUid);
+        if (existingByUid.isPresent()) {
+            UserAccount existing = existingByUid.get();
+            return new BootstrapResult(toCurrentUser(existing), false);
+        }
+
+        String email = principal.email();
+        if (email == null || email.isBlank()) {
+            throw new ApiProblemException(HttpStatus.BAD_REQUEST, "MISSING_EMAIL",
+                    "Missing Email", "Firebase user email is required to bootstrap.");
+        }
+        String normalized = normalizeEmail(email);
+
+        // 2. Check if user already exists by normalized email
+        Optional<UserAccount> existingByEmail = users.findByEmailNormalized(normalized);
+        if (existingByEmail.isPresent()) {
+            UserAccount existing = existingByEmail.get();
+            existing.linkFirebaseUid(firebaseUid, Instant.now(clock));
+            users.saveAndFlush(existing);
+            audit.record(existing.id(), "FIREBASE_LINK", "SUCCESS", existing.id(), metadata.ipAddress(), metadata.userAgent());
+            return new BootstrapResult(toCurrentUser(existing), false);
+        }
+
+        // 3. New user registration
+        PlatformRole role;
+        if ("worker".equalsIgnoreCase(requestedAccountType)) {
+            role = PlatformRole.WORKER;
+        } else if ("employer".equalsIgnoreCase(requestedAccountType)) {
+            role = PlatformRole.EMPLOYER_ADMIN;
+        } else {
+            throw new ApiProblemException(HttpStatus.BAD_REQUEST, "INVALID_ACCOUNT_TYPE",
+                    "Invalid Account Type", "Account type must be 'worker' or 'employer'.");
+        }
+
+        Instant now = Instant.now(clock);
+        UserAccount newUser = UserAccount.createWithFirebase(firebaseUid, email.trim(), normalized, role, now);
+        try {
+            users.saveAndFlush(newUser);
+        } catch (DataIntegrityViolationException exception) {
+            throw new ApiProblemException(HttpStatus.CONFLICT, "ACCOUNT_CONFLICT",
+                    "Registration conflict", "An account conflict occurred during bootstrap.");
+        }
+
+        audit.record(newUser.id(), "BOOTSTRAP", "SUCCESS", newUser.id(), metadata.ipAddress(), metadata.userAgent());
+        return new BootstrapResult(toCurrentUser(newUser), true);
+    }
+
     @Transactional(readOnly = true)
     public CurrentUser currentUser(UUID userId) {
         return users.findById(userId).map(AuthenticationService::toCurrentUser)
@@ -243,6 +299,7 @@ public class AuthenticationService {
     public record AuthenticationResult(String accessToken, Instant accessTokenExpiresAt, String refreshToken,
                                        java.time.Duration refreshTokenTtl, CurrentUser user, UUID sessionId) { }
     public record CurrentUser(UUID id, String email, List<String> roles) { }
+    public record BootstrapResult(CurrentUser user, boolean created) { }
     public record SessionView(UUID id, Instant createdAt, Instant lastSeenAt, Instant expiresAt, Instant revokedAt,
                               String ipAddress, String userAgent, boolean current, boolean active) { }
 }

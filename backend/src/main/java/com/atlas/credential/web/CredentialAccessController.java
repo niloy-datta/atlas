@@ -3,7 +3,7 @@ package com.atlas.credential.web;
 import com.atlas.credential.application.CredentialService;
 import java.util.UUID;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.atlas.identity.domain.AtlasPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +17,8 @@ public class CredentialAccessController {
     public CredentialAccessController(CredentialService credentials) { this.credentials = credentials; }
 
     @GetMapping("/credential-documents/{documentId}/download")
-    CredentialService.DownloadAuthorization download(@PathVariable UUID documentId, @AuthenticationPrincipal Jwt jwt) {
-        return credentials.authorizeDownload(UUID.fromString(jwt.getSubject()), documentId);
+    CredentialService.DownloadAuthorization download(@PathVariable UUID documentId, @AuthenticationPrincipal AtlasPrincipal principal) {
+        return credentials.authorizeDownload(principal.requireUserId(), documentId);
     }
 
     @GetMapping("/public/credentials/{credentialId}")

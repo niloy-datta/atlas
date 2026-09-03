@@ -13,7 +13,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import com.atlas.identity.domain.AtlasPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,9 +48,9 @@ public class SkillAdminController {
     }
 
     @PatchMapping("/worker-skills/{workerSkillId}/verification")
-    SkillService.WorkerSkillView verify(@PathVariable UUID workerSkillId, @AuthenticationPrincipal Jwt jwt,
+    SkillService.WorkerSkillView verify(@PathVariable UUID workerSkillId, @AuthenticationPrincipal AtlasPrincipal principal,
                                         @Valid @RequestBody VerificationRequest request) {
-        return skills.transitionVerification(UUID.fromString(jwt.getSubject()), workerSkillId,
+        return skills.transitionVerification(principal.requireUserId(), workerSkillId,
                 request.status(), request.reason());
     }
 
