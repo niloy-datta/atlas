@@ -51,20 +51,6 @@ public class UserAccount {
     protected UserAccount() {
     }
 
-    public static UserAccount create(String displayEmail, String normalizedEmail, String passwordHash,
-                                     PlatformRole role, Instant now) {
-        UserAccount user = new UserAccount();
-        user.id = UUID.randomUUID();
-        user.emailDisplay = displayEmail;
-        user.emailNormalized = normalizedEmail;
-        user.passwordHash = passwordHash;
-        user.enabled = true;
-        user.roles.add(role);
-        user.createdAt = now;
-        user.updatedAt = now;
-        return user;
-    }
-
     public static UserAccount createWithFirebase(String firebaseUid, String displayEmail, String normalizedEmail,
                                                  PlatformRole role, Instant now) {
         UserAccount user = new UserAccount();
@@ -87,14 +73,26 @@ public class UserAccount {
     public String firebaseUid() { return firebaseUid; }
     public boolean enabled() { return enabled; }
     public Set<PlatformRole> roles() { return Set.copyOf(roles); }
+    public Instant createdAt() { return createdAt; }
+    public Instant updatedAt() { return updatedAt; }
+
+    public void disable(Instant now) {
+        this.enabled = false;
+        this.updatedAt = now;
+    }
+
+    public void enable(Instant now) {
+        this.enabled = true;
+        this.updatedAt = now;
+    }
+
+    public void addRole(PlatformRole role, Instant now) {
+        this.roles.add(role);
+        this.updatedAt = now;
+    }
 
     public void linkFirebaseUid(String firebaseUid, Instant now) {
         this.firebaseUid = firebaseUid;
         this.updatedAt = now;
-    }
-
-    public void changePassword(String newHash, Instant now) {
-        passwordHash = newHash;
-        updatedAt = now;
     }
 }

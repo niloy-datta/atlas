@@ -1,9 +1,12 @@
 package com.atlas.shared.config;
 
+import com.atlas.identity.application.FirebaseTokenVerifier;
 import com.atlas.identity.config.AuthProperties;
 import com.atlas.identity.infrastructure.FirebaseAuthenticationFilter;
+import com.atlas.identity.infrastructure.UserAccountRepository;
 import java.util.Map;
 import java.util.List;
+import java.util.Locale;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +22,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfiguration {
+
+    @Bean
+    public FirebaseAuthenticationFilter firebaseAuthenticationFilter(FirebaseTokenVerifier tokenVerifier,
+                                                                     UserAccountRepository userAccountRepository,
+                                                                     ObjectMapper objectMapper) {
+        return new FirebaseAuthenticationFilter(tokenVerifier, userAccountRepository, objectMapper);
+    }
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, FirebaseAuthenticationFilter firebaseAuthenticationFilter,
                                             ObjectMapper objectMapper) throws Exception {
@@ -75,7 +86,7 @@ public class SecurityConfiguration {
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         mapper.writeValue(response.getOutputStream(), Map.of(
-                "type", "https://atlas.example/problems/" + code.toLowerCase().replace('_', '-'),
+                "type", "https://atlas.example/problems/" + code.toLowerCase(Locale.ROOT).replace('_', '-'),
                 "title", title,
                 "status", status,
                 "code", code,

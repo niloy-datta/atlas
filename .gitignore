@@ -17,3 +17,6 @@ work/
 outputs/
 *.log
 
+.mcp.json
+.agents/
+
