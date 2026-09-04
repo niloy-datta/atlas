@@ -8,8 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.atlas.TestcontainersConfiguration;
-import com.atlas.identity.CapturingMailConfiguration;
-import jakarta.servlet.http.Cookie;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,7 +23,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-@Import({TestcontainersConfiguration.class, CapturingMailConfiguration.class})
+@Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class WorkerProfileIntegrationTests {
@@ -122,14 +120,13 @@ class WorkerProfileIntegrationTests {
     }
 
     private Auth register(String kind, String email) throws Exception {
-        String body = json.writeValueAsString(Map.of("email", email, "password", "Correct-Horse-42!"));
-        MvcResult result = mvc.perform(post("/api/v1/auth/register/" + kind)
+        String token = "mock:" + UUID.randomUUID() + ":" + email;
+        String body = json.writeValueAsString(Map.of("accountType", kind));
+        mvc.perform(post("/api/v1/auth/bootstrap")
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isCreated()).andReturn();
-        JsonNode response = json.readTree(result.getResponse().getContentAsString());
-        Cookie refresh = result.getResponse().getCookie("atlas_refresh");
-        assertThat(refresh).isNotNull();
-        return new Auth(response.get("accessToken").asText());
+                .andExpect(status().isCreated());
+        return new Auth(token);
     }
 
     private Map<String, Object> profile(Long version, String handle, String visibility,

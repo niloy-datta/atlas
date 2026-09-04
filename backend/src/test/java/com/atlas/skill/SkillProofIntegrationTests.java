@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.atlas.TestcontainersConfiguration;
-import com.atlas.identity.CapturingMailConfiguration;
 import com.atlas.shared.error.ApiProblemException;
 import com.atlas.skill.application.SkillService;
 import com.atlas.skill.domain.SkillProficiency;
@@ -33,7 +32,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-@Import({TestcontainersConfiguration.class, CapturingMailConfiguration.class})
+@Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class SkillProofIntegrationTests {
@@ -228,17 +227,22 @@ class SkillProofIntegrationTests {
     }
 
     private Auth register(String kind, String email) throws Exception {
-        MvcResult result = mvc.perform(post("/api/v1/auth/register/" + kind).contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("email", email, "password", PASSWORD))))
+        String token = "mock:" + UUID.randomUUID() + ":" + email;
+        MvcResult result = mvc.perform(post("/api/v1/auth/bootstrap")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("accountType", kind))))
                 .andExpect(status().isCreated()).andReturn();
-        return auth(result, email);
+        JsonNode response = json.readTree(result.getResponse().getContentAsString());
+        UUID id = UUID.fromString(response.get("user").get("id").asText());
+        return new Auth(id, email, token);
     }
 
     private Auth login(String email) throws Exception {
-        MvcResult result = mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("email", email, "password", PASSWORD))))
-                .andExpect(status().isOk()).andReturn();
-        return auth(result, email);
+        String uid = jdbc.queryForObject("SELECT firebase_uid FROM users WHERE email_normalized = ?", String.class, email.toLowerCase());
+        UUID id = jdbc.queryForObject("SELECT id FROM users WHERE email_normalized = ?", UUID.class, email.toLowerCase());
+        String token = "mock:" + uid + ":" + email;
+        return new Auth(id, email, token);
     }
 
     private Auth auth(MvcResult result, String email) throws Exception {

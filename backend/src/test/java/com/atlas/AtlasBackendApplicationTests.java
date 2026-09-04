@@ -38,7 +38,7 @@ class AtlasBackendApplicationTests {
 				Integer.class);
 
 		assertThat(postgisVersion).isNotBlank();
-		assertThat(schemaVersion).isEqualTo(6);
+		assertThat(schemaVersion).isEqualTo(7);
 	}
 
 	@Test
@@ -56,7 +56,7 @@ class AtlasBackendApplicationTests {
 		mockMvc.perform(get("/api-docs"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.openapi").isNotEmpty())
-				.andExpect(jsonPath("$.paths['/api/v1/auth/login']").exists());
+				.andExpect(jsonPath("$.paths['/api/v1/auth/bootstrap']").exists());
 	}
 
 	@Test

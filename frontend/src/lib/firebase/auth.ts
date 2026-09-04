@@ -36,9 +36,10 @@ export async function signInWithGoogle(): Promise<User> {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const fbError = error as { code?: string };
     // If popup was blocked or unsupported, fallback to redirect
-    if (error?.code === "auth/popup-blocked" || error?.code === "auth/operation-not-supported-in-this-environment") {
+    if (fbError?.code === "auth/popup-blocked" || fbError?.code === "auth/operation-not-supported-in-this-environment") {
       await signInWithRedirect(auth, googleProvider);
       const redirectResult = await getRedirectResult(auth);
       if (redirectResult) return redirectResult.user;

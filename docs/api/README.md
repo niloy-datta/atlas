@@ -6,20 +6,14 @@ All public API routes use `/api/v1`, JSON camelCase fields, UUID identifiers, UT
 
 | Method | Path | Authentication | Purpose |
 | --- | --- | --- | --- |
-| POST | `/api/v1/auth/register/worker` | Public | Register a worker and establish a session |
-| POST | `/api/v1/auth/register/employer` | Public | Register an employer administrator and establish a session |
-| POST | `/api/v1/auth/login` | Public | Authenticate and establish a session |
-| POST | `/api/v1/auth/refresh` | Refresh cookie + origin + CSRF | Rotate the refresh token and issue a new access token |
-| POST | `/api/v1/auth/logout` | Refresh cookie + origin + CSRF | Revoke the current session and clear cookies |
-| POST | `/api/v1/auth/password-recovery` | Public, rate limited | Request a reset without revealing account existence |
-| POST | `/api/v1/auth/password-reset` | One-time reset token | Change password and revoke all sessions |
-| GET | `/api/v1/auth/me` | Bearer JWT | Read the current user allow-list |
-| GET | `/api/v1/auth/sessions` | Bearer JWT | List the caller's sessions |
-| DELETE | `/api/v1/auth/sessions/{sessionId}` | Bearer JWT | Revoke one caller-owned session |
+| POST | `/api/v1/auth/bootstrap` | Firebase ID Token Bearer | Provisions the internal Atlas account with role (`worker` or `employer`) upon first sign-in |
+| GET | `/api/v1/auth/me` | Firebase ID Token Bearer | Read the authenticated user allow-list, roles, and profile state |
 
-Successful registration, login, and refresh responses return the 10-minute access token in JSON. The 30-day opaque refresh token is set only in the `atlas_refresh` HttpOnly cookie. Browser clients read the non-HttpOnly `atlas_csrf` cookie and echo it in `X-CSRF-TOKEN` for refresh and logout. Access tokens must remain in memory.
+ATLAS delegates primary credential management, passwords, social authentication (Google OAuth), email verification, and session refreshes to **Firebase Authentication**.
 
-Recovery always returns `202 Accepted` for a valid email-shaped request, whether or not an account exists. Local reset emails appear in Mailpit at `http://localhost:8025`.
+Clients authenticate with Firebase on the frontend, retrieve a Firebase ID token, and pass it in the `Authorization: Bearer <token>` header to the Spring Boot backend. The backend verifies the token using the Firebase Admin SDK, maps the Firebase UID to the internal Atlas UUID (`users.id`), and enforces roles and domain authorization.
+
+Account provisioning is strictly handled by `POST /api/v1/auth/bootstrap`. The backend authentication filter is side-effect-free and never performs automatic email linking or implicit account creation.
 
 ## Worker profile endpoints
 

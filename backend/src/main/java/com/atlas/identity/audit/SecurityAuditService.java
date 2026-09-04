@@ -19,7 +19,7 @@ public class SecurityAuditService {
         this.clock = clock;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.MANDATORY)
     public void record(UUID actorId, String eventType, String outcome, UUID subjectId,
                        String ipAddress, String userAgent) {
         jdbc.update("""

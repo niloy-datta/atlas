@@ -1,7 +1,7 @@
 # ADR 004: Access and refresh token strategy
 
-- Status: Accepted
-- Date: 2026-08-30
+- Status: Superseded by ADR 007
+- Date: 2026-08-30 (Superseded: 2026-09-04)
 
 ## Context
 

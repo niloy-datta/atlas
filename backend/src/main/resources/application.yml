@@ -55,6 +55,10 @@ atlas:
     recovery-limit: ${ATLAS_RECOVERY_LIMIT:5}
     rate-limit-window: 15m
     password-reset-url: ${ATLAS_PASSWORD_RESET_URL:http://localhost:3000/reset-password}
+  firebase:
+    project-id: ${ATLAS_FIREBASE_PROJECT_ID:atlas-verified}
+    credentials-path: ${ATLAS_FIREBASE_CREDENTIALS_PATH:}
+    emulator-host: ${FIREBASE_AUTH_EMULATOR_HOST:}
   credential-storage:
     enabled: ${ATLAS_CREDENTIAL_STORAGE_ENABLED:true}
     endpoint: ${ATLAS_MINIO_ENDPOINT:http://localhost:9000}

@@ -1,23 +1,13 @@
 package com.atlas.identity;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.atlas.TestcontainersConfiguration;
-import com.atlas.identity.CapturingMailConfiguration.CapturingPasswordRecoveryMailer;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,204 +16,164 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.security.oauth2.jwt.JwtValidationException;
-import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
-@Import({TestcontainersConfiguration.class, CapturingMailConfiguration.class})
+@Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class AuthenticationIntegrationTests {
-    private static final String ORIGIN = "http://localhost:3000";
+
     private final MockMvc mvc;
     private final ObjectMapper json;
     private final JdbcTemplate jdbc;
-    private final CapturingPasswordRecoveryMailer mailer;
-    private final JwtEncoder jwtEncoder;
-    private final JwtDecoder jwtDecoder;
 
     @Autowired
-    AuthenticationIntegrationTests(MockMvc mvc, ObjectMapper json, JdbcTemplate jdbc,
-                                   CapturingPasswordRecoveryMailer mailer, JwtEncoder jwtEncoder,
-                                   JwtDecoder jwtDecoder) {
+    AuthenticationIntegrationTests(MockMvc mvc, ObjectMapper json, JdbcTemplate jdbc) {
         this.mvc = mvc;
         this.json = json;
         this.jdbc = jdbc;
-        this.mailer = mailer;
-        this.jwtEncoder = jwtEncoder;
-        this.jwtDecoder = jwtDecoder;
     }
 
     @Test
-    void registrationLoginCurrentUserAndCookieSecurity() throws Exception {
-        String email = unique("worker");
-        MvcResult registration = register("worker", email, "Correct-Horse-42!")
+    void unauthenticatedRequestsAreRejected() throws Exception {
+        mvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(post("/api/v1/auth/bootstrap")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"accountType\":\"worker\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+    }
+
+    @Test
+    void malformedAndInvalidTokensAreRejected() throws Exception {
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Basic 12345"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("MALFORMED_AUTHORIZATION_HEADER"));
+
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer "))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("MISSING_BEARER_TOKEN"));
+
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer invalid-token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_FIREBASE_TOKEN"));
+
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer expired-token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("FIREBASE_TOKEN_EXPIRED"));
+
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer revoked-token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("FIREBASE_TOKEN_REVOKED"));
+    }
+
+    @Test
+    void unprovisionedUserAccessingMeReturnsUnauthorized() throws Exception {
+        String uid = "unprovisioned-" + UUID.randomUUID();
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer mock:" + uid))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
+    }
+
+    @Test
+    void bootstrapProvisionsWorkerAndReturnsCreated() throws Exception {
+        String uid = "worker-" + UUID.randomUUID();
+        String email = uid + "@example.test";
+
+        bootstrap(uid, email, "worker")
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.user.roles[0]").value("WORKER"))
-                .andExpect(cookie().httpOnly("atlas_refresh", true))
-                .andExpect(cookie().sameSite("atlas_refresh", "Lax"))
-                .andExpect(cookie().httpOnly("atlas_csrf", false))
-                .andReturn();
+                .andExpect(jsonPath("$.created").value(true))
+                .andExpect(jsonPath("$.user.email").value(email))
+                .andExpect(jsonPath("$.user.roles[0]").value("WORKER"));
 
-        Tokens tokens = tokens(registration);
-        String storedPassword = jdbc.queryForObject(
-                "SELECT password_hash FROM users WHERE email_normalized = ?", String.class, email);
-        assertThat(storedPassword).startsWith("$argon2id$").doesNotContain("Correct-Horse-42!");
-        Integer rawRefreshTokens = jdbc.queryForObject(
-                "SELECT count(*) FROM refresh_tokens WHERE token_hash = ?", Integer.class,
-                tokens.refreshCookie().getValue());
-        assertThat(rawRefreshTokens).isZero();
-        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + tokens.access()))
+        // Verify currentUser endpoint returns user details
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer mock:" + uid + ":" + email))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(email));
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.roles[0]").value("WORKER"));
 
-        mvc.perform(post("/api/v1/auth/refresh").cookie(tokens.refreshCookie()))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("CSRF_REJECTED"));
-
-        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
-                        .content(credentials(email, "wrong-password-42")))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("AUTHENTICATION_FAILED"));
+        // Verify DB persistence
+        String dbUid = jdbc.queryForObject(
+                "SELECT firebase_uid FROM users WHERE email_normalized = ?", String.class, email.toLowerCase());
+        assertThat(dbUid).isEqualTo(uid);
     }
 
     @Test
-    void refreshRotatesAndReuseRevokesEntireSession() throws Exception {
-        String email = unique("rotation");
-        Tokens original = tokens(register("worker", email, "Correct-Horse-42!").andReturn());
+    void bootstrapProvisionsEmployerAndReturnsCreated() throws Exception {
+        String uid = "employer-" + UUID.randomUUID();
+        String email = uid + "@example.test";
 
-        MvcResult rotatedResult = refresh(original).andExpect(status().isOk()).andReturn();
-        Tokens rotated = tokens(rotatedResult);
-        assertThat(rotated.refreshCookie().getValue()).isNotEqualTo(original.refreshCookie().getValue());
-
-        refresh(original).andExpect(status().isUnauthorized());
-        refresh(rotated).andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + rotated.access()))
-                .andExpect(status().isUnauthorized());
-
-        Integer reuseEvents = jdbc.queryForObject(
-                "SELECT count(*) FROM audit_events WHERE event_type = 'REFRESH_TOKEN_REUSE'", Integer.class);
-        assertThat(reuseEvents).isGreaterThanOrEqualTo(1);
+        bootstrap(uid, email, "employer")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.created").value(true))
+                .andExpect(jsonPath("$.user.email").value(email))
+                .andExpect(jsonPath("$.user.roles[0]").value("EMPLOYER_ADMIN"));
     }
 
     @Test
-    void passwordRecoveryDoesNotEnumerateUsersAndResetRevokesSessions() throws Exception {
-        String email = unique("recovery");
-        Tokens beforeReset = tokens(register("worker", email, "Correct-Horse-42!").andReturn());
+    void bootstrapIsIdempotentForSameFirebaseUid() throws Exception {
+        String uid = "idempotent-" + UUID.randomUUID();
+        String email = uid + "@example.test";
 
-        recover(email).andExpect(status().isAccepted());
-        recover(unique("missing")).andExpect(status().isAccepted());
-        String resetToken = mailer.messageFor(email).token();
+        bootstrap(uid, email, "worker")
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.created").value(true));
 
-        mvc.perform(post("/api/v1/auth/password-reset").contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new ResetBody(resetToken, "New-Correct-Horse-84!"))))
-                .andExpect(status().isNoContent());
-
-        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + beforeReset.access()))
-                .andExpect(status().isUnauthorized());
-        login(email, "Correct-Horse-42!").andExpect(status().isUnauthorized());
-        login(email, "New-Correct-Horse-84!").andExpect(status().isOk());
-        mvc.perform(post("/api/v1/auth/password-reset").contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(new ResetBody(resetToken, "Another-Password-95!"))))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void jwtRejectsWrongIssuerAudienceAndExpiredTokens() {
-        Instant now = Instant.now();
-        assertThatThrownBy(() -> jwtDecoder.decode(encoded("https://wrong.example", List.of("atlas-web"), now.plusSeconds(60))))
-                .isInstanceOf(JwtValidationException.class);
-        assertThatThrownBy(() -> jwtDecoder.decode(encoded("http://localhost:8080", List.of("wrong-audience"), now.plusSeconds(60))))
-                .isInstanceOf(JwtValidationException.class);
-        assertThatThrownBy(() -> jwtDecoder.decode(encoded("http://localhost:8080", List.of("atlas-web"), now.minusSeconds(60))))
-                .isInstanceOf(JwtValidationException.class);
-    }
-
-    @Test
-    void sessionListingAndRevocationAreOwnerScopedAndImmediate() throws Exception {
-        String email = unique("sessions");
-        Tokens tokens = tokens(register("employer", email, "Correct-Horse-42!")
-                .andExpect(jsonPath("$.user.roles[0]").value("EMPLOYER_ADMIN")).andReturn());
-        MvcResult list = mvc.perform(get("/api/v1/auth/sessions")
-                        .header("Authorization", "Bearer " + tokens.access()))
+        // Subsequent bootstrap with same UID returns 200 OK and created=false
+        bootstrap(uid, email, "worker")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].current").value(true))
-                .andReturn();
-        UUID sessionId = UUID.fromString(json.readTree(list.getResponse().getContentAsString()).get(0).get("id").asText());
-
-        mvc.perform(delete("/api/v1/auth/sessions/{id}", UUID.randomUUID())
-                        .header("Authorization", "Bearer " + tokens.access()))
-                .andExpect(status().isNotFound());
-        mvc.perform(delete("/api/v1/auth/sessions/{id}", sessionId)
-                        .header("Authorization", "Bearer " + tokens.access()))
-                .andExpect(status().isNoContent());
-        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + tokens.access()))
-                .andExpect(status().isUnauthorized())
-                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                .andExpect(jsonPath("$.created").value(false))
+                .andExpect(jsonPath("$.user.email").value(email));
     }
 
     @Test
-    void duplicateRegistrationAndUntrustedOriginsAreRejected() throws Exception {
-        String email = unique("duplicate");
-        Tokens tokens = tokens(register("worker", email, "Correct-Horse-42!").andReturn());
-        register("worker", email.toUpperCase(), "Another-Password-84!")
+    void bootstrapRejectsConflictingEmailUnderDifferentUid() throws Exception {
+        String email = "conflict-" + UUID.randomUUID() + "@example.test";
+        String uid1 = "user-1-" + UUID.randomUUID();
+        String uid2 = "user-2-" + UUID.randomUUID();
+
+        bootstrap(uid1, email, "worker").andExpect(status().isCreated());
+
+        // Attempting to bootstrap with different UID but same email must be rejected with 409
+        bootstrap(uid2, email, "worker")
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"));
-        mvc.perform(post("/api/v1/auth/refresh").header("Origin", "https://evil.example")
-                        .header("X-CSRF-TOKEN", tokens.csrfCookie().getValue())
-                        .cookie(tokens.refreshCookie(), tokens.csrfCookie()))
-                .andExpect(status().isForbidden());
     }
 
-    private org.springframework.test.web.servlet.ResultActions register(String kind, String email, String password) throws Exception {
-        return mvc.perform(post("/api/v1/auth/register/" + kind).contentType(MediaType.APPLICATION_JSON)
-                .content(credentials(email, password)));
+    @Test
+    void bootstrapRejectsInvalidAccountType() throws Exception {
+        String uid = "invalid-role-" + UUID.randomUUID();
+        String email = uid + "@example.test";
+
+        bootstrap(uid, email, "hacker")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_ACCOUNT_TYPE"));
     }
 
-    private org.springframework.test.web.servlet.ResultActions login(String email, String password) throws Exception {
-        return mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
-                .content(credentials(email, password)));
+    @Test
+    void disabledUserAccountIsForbidden() throws Exception {
+        String uid = "disabled-" + UUID.randomUUID();
+        String email = uid + "@example.test";
+
+        bootstrap(uid, email, "worker").andExpect(status().isCreated());
+
+        // Disable user in database
+        jdbc.update("UPDATE users SET enabled = false WHERE firebase_uid = ?", uid);
+
+        // Subsequent authenticated requests are rejected with 403 Forbidden
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer mock:" + uid + ":" + email))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCOUNT_DISABLED"));
     }
 
-    private org.springframework.test.web.servlet.ResultActions recover(String email) throws Exception {
-        return mvc.perform(post("/api/v1/auth/password-recovery").contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(new RecoveryBody(email))));
+    private ResultActions bootstrap(String uid, String email, String accountType) throws Exception {
+        return mvc.perform(post("/api/v1/auth/bootstrap")
+                .header("Authorization", "Bearer mock:" + uid + ":" + email)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"accountType\":\"" + accountType + "\"}"));
     }
-
-    private org.springframework.test.web.servlet.ResultActions refresh(Tokens tokens) throws Exception {
-        return mvc.perform(post("/api/v1/auth/refresh").header("Origin", ORIGIN)
-                .header("X-CSRF-TOKEN", tokens.csrfCookie().getValue())
-                .cookie(tokens.refreshCookie(), tokens.csrfCookie()));
-    }
-
-    private Tokens tokens(MvcResult result) throws Exception {
-        JsonNode body = json.readTree(result.getResponse().getContentAsString());
-        Cookie refresh = result.getResponse().getCookie("atlas_refresh");
-        Cookie csrf = result.getResponse().getCookie("atlas_csrf");
-        return new Tokens(body.get("accessToken").asText(), refresh, csrf);
-    }
-
-    private String encoded(String issuer, List<String> audience, Instant expiry) {
-        Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-        JwtClaimsSet claims = JwtClaimsSet.builder().issuer(issuer).audience(audience)
-                .subject(UUID.randomUUID().toString()).issuedAt(now.minusSeconds(120)).expiresAt(expiry)
-                .claim("roles", List.of("WORKER")).claim("sessionId", UUID.randomUUID().toString()).build();
-        return jwtEncoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
-    }
-
-    private String credentials(String email, String password) throws Exception {
-        return json.writeValueAsString(new CredentialsBody(email, password));
-    }
-
-    private static String unique(String prefix) { return prefix + '-' + UUID.randomUUID() + "@example.test"; }
-    private record Tokens(String access, Cookie refreshCookie, Cookie csrfCookie) { }
-    private record CredentialsBody(String email, String password) { }
-    private record RecoveryBody(String email) { }
-    private record ResetBody(String token, String newPassword) { }
 }

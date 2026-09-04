@@ -61,4 +61,45 @@ public class TestcontainersConfiguration {
 		public void put(String objectKey, byte[] value) { objects.put(objectKey, value.clone()); }
 	}
 
+	@Bean
+	@org.springframework.context.annotation.Primary
+	com.atlas.identity.application.FirebaseTokenVerifier mockFirebaseTokenVerifier() {
+		return new com.atlas.identity.application.FirebaseTokenVerifier() {
+			@Override
+			public com.atlas.identity.application.FirebaseVerifiedUser verify(String idToken) {
+				return verify(idToken, false);
+			}
+
+			@Override
+			public com.atlas.identity.application.FirebaseVerifiedUser verify(String idToken, boolean checkRevoked) {
+				if (idToken == null || idToken.isBlank()) {
+					throw new com.atlas.shared.error.ApiProblemException(
+							org.springframework.http.HttpStatus.UNAUTHORIZED,
+							"MISSING_BEARER_TOKEN", "Missing Bearer Token", "Firebase ID token is required.");
+				}
+				if (idToken.startsWith("mock:")) {
+					String[] parts = idToken.substring(5).split(":", 2);
+					String uid = parts[0];
+					String email = parts.length > 1 ? parts[1] : uid + "@example.test";
+					return new com.atlas.identity.application.FirebaseVerifiedUser(uid, email, true, "Mock User", Map.of());
+				}
+				if ("invalid-token".equals(idToken)) {
+					throw new com.atlas.shared.error.ApiProblemException(
+							org.springframework.http.HttpStatus.UNAUTHORIZED,
+							"INVALID_FIREBASE_TOKEN", "Invalid Firebase ID Token", "Firebase token validation failed.");
+				}
+				if ("expired-token".equals(idToken)) {
+					throw new com.atlas.shared.error.ApiProblemException(
+							org.springframework.http.HttpStatus.UNAUTHORIZED,
+							"FIREBASE_TOKEN_EXPIRED", "Firebase ID Token Expired", "Firebase ID token has expired.");
+				}
+				if ("revoked-token".equals(idToken)) {
+					throw new com.atlas.shared.error.ApiProblemException(
+							org.springframework.http.HttpStatus.UNAUTHORIZED,
+							"FIREBASE_TOKEN_REVOKED", "Firebase ID Token Revoked", "Firebase ID token has been revoked.");
+				}
+				return new com.atlas.identity.application.FirebaseVerifiedUser(idToken, idToken + "@example.test", true, "Mock User", Map.of());
+			}
+		};
+	}
 }
