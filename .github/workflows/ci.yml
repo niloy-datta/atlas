@@ -29,7 +29,9 @@ jobs:
 
       - name: Verify backend
         working-directory: backend
-        run: ./mvnw -B test
+        run: |
+          chmod +x ./mvnw
+          ./mvnw -B test
 
   frontend:
     runs-on: ubuntu-latest
