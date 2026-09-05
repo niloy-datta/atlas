@@ -77,6 +77,7 @@ export default function WorkerDashboardPage() {
             </Link>
             <nav className="flex items-center gap-4 text-sm font-medium text-slate-600">
               <Link href="/dashboard/worker" className="text-orange-600 font-semibold">Dashboard</Link>
+              <Link href="/shifts" className="hover:text-slate-900 font-medium">Browse Shifts ⏱️</Link>
               <Link href="/jobs" className="hover:text-slate-900">Browse Jobs</Link>
               <Link href="/profile" className="hover:text-slate-900">Profile</Link>
               <Link href="/skills" className="hover:text-slate-900">Skills</Link>
@@ -124,10 +125,16 @@ export default function WorkerDashboardPage() {
 
           <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
             <Link
+              href="/shifts"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold text-center shadow-sm"
+            >
+              Browse Shifts ⏱️
+            </Link>
+            <Link
               href="/jobs"
               className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-semibold text-center shadow-sm"
             >
-              Browse Open Jobs 🔍
+              Browse Jobs 💼
             </Link>
             {profile?.handle && (
               <Link

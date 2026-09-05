@@ -15,6 +15,7 @@ import {
   MemberRow,
 } from "../../../lib/api/organizations";
 import { listOrganizationJobs, JobSummary } from "../../../lib/api/jobs";
+import { listOrganizationShifts, ShiftSummaryView } from "../../../lib/api/shifts";
 
 export default function EmployerDashboardPage() {
   const { firebaseUser, atlasUser, loading: authLoading, signOut } = useAuth();
@@ -25,6 +26,7 @@ export default function EmployerDashboardPage() {
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [jobs, setJobs] = useState<JobSummary[]>([]);
+  const [shifts, setShifts] = useState<ShiftSummaryView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,17 +48,19 @@ export default function EmployerDashboardPage() {
         }
 
         const activeId = orgList[0].id;
-        const [orgDetail, locs, mems, jobPage] = await Promise.all([
+        const [orgDetail, locs, mems, jobPage, shiftPage] = await Promise.all([
           getOrganization(activeId).catch(() => null),
           listOrganizationLocations(activeId).catch(() => []),
           listOrganizationMembers(activeId).catch(() => []),
           listOrganizationJobs(activeId).catch(() => ({ items: [], total: 0, page: 0, size: 20 })),
+          listOrganizationShifts(activeId, { size: 20 }).catch(() => ({ items: [], total: 0, page: 0, size: 20 })),
         ]);
 
         setSelectedOrg(orgDetail);
         setLocations(locs);
         setMembers(mems);
         setJobs(jobPage.items);
+        setShifts(shiftPage.items);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load employer dashboard");
       } finally {
@@ -98,6 +102,7 @@ export default function EmployerDashboardPage() {
             </Link>
             <nav className="flex items-center gap-4 text-sm font-medium text-slate-600">
               <Link href="/dashboard/employer" className="text-blue-600 font-semibold">Dashboard</Link>
+              <Link href="/shifts" className="hover:text-slate-900 font-medium">Shifts Roster</Link>
               <Link href="/jobs" className="hover:text-slate-900">Job Marketplace</Link>
               <Link href="/organizations" className="hover:text-slate-900">Organizations</Link>
             </nav>
@@ -147,6 +152,12 @@ export default function EmployerDashboardPage() {
 
           <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
             <Link
+              href="/shifts/create"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold text-center shadow-sm"
+            >
+              + Schedule a Shift
+            </Link>
+            <Link
               href="/jobs/create"
               className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-semibold text-center shadow-sm"
             >
@@ -156,15 +167,63 @@ export default function EmployerDashboardPage() {
               href="/organizations"
               className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium text-center"
             >
-              Organization Settings
+              Settings
             </Link>
           </div>
         </div>
 
         {/* 2 Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Jobs & Locations */}
+          {/* Left Column: Shifts, Jobs & Locations */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Scheduled Shifts */}
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4 border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⏱️</span>
+                  <h2 className="font-bold text-slate-900">Scheduled Shifts ({shifts.length})</h2>
+                </div>
+                <Link
+                  href="/shifts/create"
+                  className="text-xs font-semibold text-emerald-600 hover:text-emerald-700"
+                >
+                  + Schedule New Shift
+                </Link>
+              </div>
+
+              {shifts.length > 0 ? (
+                <div className="space-y-3">
+                  {shifts.map((shift) => (
+                    <Link
+                      key={shift.id}
+                      href={`/shifts/${shift.id}`}
+                      className="p-3.5 bg-slate-50 hover:bg-emerald-50/50 rounded-lg border border-slate-100 flex items-center justify-between transition group"
+                    >
+                      <div>
+                        <div className="font-semibold text-sm text-slate-900 group-hover:text-emerald-600 transition">
+                          {shift.title}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          {new Date(shift.startTime).toLocaleString()} • {shift.capacity} slots • £{(shift.hourlyRatePence / 100).toFixed(2)}/hr
+                        </div>
+                      </div>
+                      <span className={`text-xs px-2.5 py-1 font-semibold rounded-full ${
+                        shift.status === "PUBLISHED" ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-700"
+                      }`}>
+                        {shift.status}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-slate-500 text-sm">
+                  <p>No active shifts scheduled yet.</p>
+                  <Link href="/shifts/create" className="text-emerald-600 font-semibold text-xs mt-1 inline-block">
+                    Schedule your first shift →
+                  </Link>
+                </div>
+              )}
+            </div>
             {/* Active Job Postings */}
             <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
               <div className="flex items-center justify-between mb-4 border-b pb-3">
