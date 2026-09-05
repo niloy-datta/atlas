@@ -14,6 +14,7 @@ import {
   LocationRow,
   MemberRow,
 } from "../../../lib/api/organizations";
+import { listOrganizationJobs, JobSummary } from "../../../lib/api/jobs";
 
 export default function EmployerDashboardPage() {
   const { firebaseUser, atlasUser, loading: authLoading, signOut } = useAuth();
@@ -23,6 +24,7 @@ export default function EmployerDashboardPage() {
   const [selectedOrg, setSelectedOrg] = useState<OrganizationView | null>(null);
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [members, setMembers] = useState<MemberRow[]>([]);
+  const [jobs, setJobs] = useState<JobSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,15 +46,17 @@ export default function EmployerDashboardPage() {
         }
 
         const activeId = orgList[0].id;
-        const [orgDetail, locs, mems] = await Promise.all([
+        const [orgDetail, locs, mems, jobPage] = await Promise.all([
           getOrganization(activeId).catch(() => null),
           listOrganizationLocations(activeId).catch(() => []),
           listOrganizationMembers(activeId).catch(() => []),
+          listOrganizationJobs(activeId).catch(() => ({ items: [], total: 0, page: 0, size: 20 })),
         ]);
 
         setSelectedOrg(orgDetail);
         setLocations(locs);
         setMembers(mems);
+        setJobs(jobPage.items);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load employer dashboard");
       } finally {
@@ -94,6 +98,7 @@ export default function EmployerDashboardPage() {
             </Link>
             <nav className="flex items-center gap-4 text-sm font-medium text-slate-600">
               <Link href="/dashboard/employer" className="text-blue-600 font-semibold">Dashboard</Link>
+              <Link href="/jobs" className="hover:text-slate-900">Job Marketplace</Link>
               <Link href="/organizations" className="hover:text-slate-900">Organizations</Link>
             </nav>
           </div>
@@ -142,6 +147,12 @@ export default function EmployerDashboardPage() {
 
           <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
             <Link
+              href="/jobs/create"
+              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-semibold text-center shadow-sm"
+            >
+              + Post a Job
+            </Link>
+            <Link
               href="/organizations"
               className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium text-center"
             >
@@ -152,8 +163,57 @@ export default function EmployerDashboardPage() {
 
         {/* 2 Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Locations & Team */}
+          {/* Left Column: Jobs & Locations */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Active Job Postings */}
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4 border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">💼</span>
+                  <h2 className="font-bold text-slate-900">Job Engagements ({jobs.length})</h2>
+                </div>
+                <Link
+                  href="/jobs/create"
+                  className="text-xs font-semibold text-orange-600 hover:text-orange-700"
+                >
+                  + Post New Job
+                </Link>
+              </div>
+
+              {jobs.length > 0 ? (
+                <div className="space-y-3">
+                  {jobs.map((job) => (
+                    <Link
+                      key={job.id}
+                      href={`/jobs/${job.id}`}
+                      className="p-3.5 bg-slate-50 hover:bg-orange-50/50 rounded-lg border border-slate-100 flex items-center justify-between transition group"
+                    >
+                      <div>
+                        <div className="font-semibold text-sm text-slate-900 group-hover:text-orange-600 transition">
+                          {job.title}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          {job.jobType} • {job.locationName || job.formattedAddress || "Remote"} • {job.requiredSkillsCount} required skills
+                        </div>
+                      </div>
+                      <span className={`text-xs px-2.5 py-1 font-semibold rounded-full ${
+                        job.status === "PUBLISHED" ? "bg-green-100 text-green-800" : "bg-slate-200 text-slate-700"
+                      }`}>
+                        {job.status}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-slate-500 text-sm">
+                  <p>No job engagements created yet.</p>
+                  <Link href="/jobs/create" className="text-orange-600 font-semibold text-xs mt-1 inline-block">
+                    Create your first job posting →
+                  </Link>
+                </div>
+              )}
+            </div>
+
             {/* Operating Locations */}
             <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
               <div className="flex items-center justify-between mb-4 border-b pb-3">

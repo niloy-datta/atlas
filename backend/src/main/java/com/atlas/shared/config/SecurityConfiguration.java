@@ -54,6 +54,7 @@ public class SecurityConfiguration {
                                 "/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/work-pass/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/skills", "/api/v1/skills/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/jobs", "/api/v1/jobs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/public/credentials/*").permitAll()
                         .requestMatchers("/api/v1/auth/bootstrap").authenticated()
                         .requestMatchers("/api/v1/auth/me").authenticated()
