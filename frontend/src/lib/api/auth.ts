@@ -7,3 +7,4 @@ export async function bootstrapAtlas(accountType: "worker" | "employer"): Promis
 export async function getMe(): Promise<AtlasUser> {
   return atlasApi.get<AtlasUser>("/api/v1/auth/me");
 }
+

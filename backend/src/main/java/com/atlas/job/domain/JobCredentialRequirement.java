@@ -12,3 +12,4 @@ public record JobCredentialRequirement(
         boolean required,
         Instant createdAt
 ) {}
+

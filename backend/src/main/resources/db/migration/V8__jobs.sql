@@ -47,3 +47,4 @@ CREATE TABLE job_required_credentials (
 );
 
 CREATE INDEX idx_job_required_creds_job ON job_required_credentials(job_id);
+

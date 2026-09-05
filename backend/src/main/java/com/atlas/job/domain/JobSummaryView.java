@@ -24,3 +24,4 @@ public record JobSummaryView(
         Double distanceMeters,
         Instant createdAt
 ) {}
+

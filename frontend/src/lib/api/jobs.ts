@@ -224,3 +224,4 @@ export async function removeJobCredentialRequirement(
 ): Promise<JobDetail> {
   return atlasApi.delete<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/credentials/${credentialRequirementId}`);
 }
+

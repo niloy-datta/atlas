@@ -31,3 +31,4 @@ public record ShiftDetailView(
         Instant createdAt,
         Instant updatedAt
 ) {}
+

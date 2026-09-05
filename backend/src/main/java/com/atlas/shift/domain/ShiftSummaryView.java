@@ -28,3 +28,4 @@ public record ShiftSummaryView(
         Double distanceMeters,
         Instant createdAt
 ) {}
+

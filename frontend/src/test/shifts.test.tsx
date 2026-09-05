@@ -124,3 +124,4 @@ describe("Phase 3: Shifts Domain Frontend Flows", () => {
     expect(screen.getByText("Hourly Rate (£/hr)")).toBeDefined();
   });
 });
+

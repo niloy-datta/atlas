@@ -41,3 +41,4 @@ public class ShiftDiscoveryController {
         return shiftService.getPublicShift(shiftId);
     }
 }
+

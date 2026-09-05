@@ -27,3 +27,4 @@ public record JobDetailView(
         Instant createdAt,
         Instant updatedAt
 ) {}
+

@@ -22,3 +22,4 @@ public enum ShiftStatus {
         return ALLOWED_TRANSITIONS.getOrDefault(this, Set.of()).contains(next);
     }
 }
+

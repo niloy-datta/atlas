@@ -5,3 +5,4 @@ public enum JobType {
     SERVICE,
     CONTRACT
 }
+

@@ -49,3 +49,4 @@ CREATE TABLE shift_required_credentials (
 );
 
 CREATE INDEX idx_shift_required_creds_shift ON shift_required_credentials(shift_id);
+

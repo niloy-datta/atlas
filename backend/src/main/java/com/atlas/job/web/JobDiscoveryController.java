@@ -38,3 +38,4 @@ public class JobDiscoveryController {
         return jobService.getPublicJob(jobId);
     }
 }
+

@@ -276,3 +276,4 @@ public class OrganizationShiftController {
             Boolean required
     ) {}
 }
+

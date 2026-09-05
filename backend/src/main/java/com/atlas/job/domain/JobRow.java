@@ -21,3 +21,4 @@ public record JobRow(
         Instant createdAt,
         Instant updatedAt
 ) {}
+

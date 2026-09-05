@@ -24,3 +24,4 @@ public record ShiftRow(
         Instant createdAt,
         Instant updatedAt
 ) {}
+

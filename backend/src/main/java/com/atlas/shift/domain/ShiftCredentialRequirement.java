@@ -12,3 +12,4 @@ public record ShiftCredentialRequirement(
         boolean required,
         Instant createdAt
 ) {}
+

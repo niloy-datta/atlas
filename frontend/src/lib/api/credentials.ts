@@ -76,3 +76,4 @@ export async function completeDocumentUpload(credentialId: string, documentId: s
 export async function submitCredentialForVerification(credentialId: string): Promise<CredentialView> {
   return atlasApi.post<CredentialView>(`/api/v1/workers/me/credentials/${credentialId}/submit`);
 }
+

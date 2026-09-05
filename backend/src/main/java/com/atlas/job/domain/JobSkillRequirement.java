@@ -14,3 +14,4 @@ public record JobSkillRequirement(
         boolean required,
         Instant createdAt
 ) {}
+

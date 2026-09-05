@@ -69,3 +69,4 @@ export async function updateWorkerSkillProficiency(id: string, data: UpdateProfi
 export async function removeWorkerSkill(id: string): Promise<void> {
   return atlasApi.delete<void>(`/api/v1/workers/me/skills/${id}`);
 }
+

@@ -24,3 +24,4 @@ public enum JobStatus {
         return ALLOWED_TRANSITIONS.getOrDefault(this, Set.of()).contains(next);
     }
 }
+

@@ -107,3 +107,4 @@ export async function addOrganizationLocation(id: string, data: CreateLocationRe
 export async function requestOrganizationVerification(id: string): Promise<OrganizationView> {
   return atlasApi.post<OrganizationView>(`/api/v1/organizations/${id}/verification-request`);
 }
+

@@ -14,3 +14,4 @@ public record ShiftSkillRequirement(
         boolean required,
         Instant createdAt
 ) {}
+

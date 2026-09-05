@@ -124,3 +124,4 @@ export async function getPrivateWorkPass(): Promise<PrivateWorkPass> {
 export async function getPublicWorkPass(handle: string): Promise<PublicWorkPass> {
   return atlasApi.get<PublicWorkPass>(`/api/v1/work-pass/${encodeURIComponent(handle)}`, false);
 }
+
