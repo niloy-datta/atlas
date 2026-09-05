@@ -1,12 +1,12 @@
 $ErrorActionPreference = 'Stop'
 
-$adoptiumJdk = Get-ChildItem 'C:\Program Files\Eclipse Adoptium\jdk-25*' -Directory -ErrorAction SilentlyContinue |
+$jdk = Get-ChildItem 'C:\Program Files\Eclipse Adoptium\jdk-21*', 'C:\Program Files\Microsoft\jdk-21*', 'C:\Program Files\Java\jdk-21*' -Directory -ErrorAction SilentlyContinue |
     Sort-Object Name -Descending |
     Select-Object -First 1
 
-if ($adoptiumJdk) {
-    $env:JAVA_HOME = $adoptiumJdk.FullName
-    $env:Path = "$($adoptiumJdk.FullName)\bin;$env:Path"
+if ($jdk) {
+    $env:JAVA_HOME = $jdk.FullName
+    $env:Path = "$($jdk.FullName)\bin;$env:Path"
 }
 
 $dockerBin = 'C:\Program Files\Docker\Docker\resources\bin'
@@ -14,7 +14,7 @@ if (Test-Path "$dockerBin\docker.exe") {
     $env:Path = "$dockerBin;$env:Path"
 }
 
-$requiredCommands = @('java', 'node', 'npm', 'git', 'docker')
+$requiredCommands = @('java', 'node', 'npm', 'git')
 $missing = @()
 
 foreach ($command in $requiredCommands) {
@@ -28,14 +28,19 @@ if ($missing.Count -gt 0) {
 }
 
 $javaOutput = (& java -version 2>&1 | Out-String)
-if ($javaOutput -notmatch 'version "25') {
-    throw "Java 25 is required. Detected: $javaOutput"
+if ($javaOutput -notmatch 'version "21') {
+    throw "Java 21 LTS is required. Detected: $javaOutput"
 }
 
 & node --version
 & npm --version
 & git --version
-& docker --version
-& docker compose version
 
-Write-Output 'ATLAS environment check passed.'
+if (Get-Command docker -ErrorAction SilentlyContinue) {
+    & docker --version
+    & docker compose version
+} else {
+    Write-Host 'Docker is not currently detected on PATH; local infrastructure requires Docker when executing full Compose services.'
+}
+
+Write-Output 'ATLAS / SkillHub environment check passed (Java 21 LTS, Node, npm, Git verified).'

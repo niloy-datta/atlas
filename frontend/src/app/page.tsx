@@ -8,33 +8,36 @@ export default function Home() {
   const { firebaseUser, atlasUser, signOut } = useAuth();
   const [composerInput, setComposerInput] = useState("");
   const [activeMode, setActiveMode] = useState<"text" | "speak" | "photo">("text");
+  const [interactiveNotice, setInteractiveNotice] = useState<string | null>(null);
+
+  const showNotice = (msg: string) => {
+    setInteractiveNotice(msg);
+    setTimeout(() => setInteractiveNotice(null), 4000);
+  };
 
   const handleModeClick = (mode: "speak" | "photo") => {
     setActiveMode(mode);
     if (mode === "speak") {
-      setComposerInput("Listening... Speak your issue now...");
-      setTimeout(() => {
-        setComposerInput("Leaking pipe under kitchen sink");
-      }, 1800);
+      setComposerInput("Voice preview: Leaking pipe under kitchen sink");
     } else if (mode === "photo") {
-      setComposerInput("Photo uploaded: [broken_circuit_breaker.png]");
+      setComposerInput("Photo attached: [broken_circuit_breaker.png]");
     }
   };
 
   const handleHeroSubmit = () => {
     if (!composerInput.trim()) {
-      alert("Please describe your problem or shift requirement first.");
+      showNotice("Please enter a service or shift requirement first.");
       return;
     }
-    alert(`Scoping job for: "${composerInput.trim()}"...\nMatching top verified professionals & local workers near you.`);
+    showNotice(`Scoping requirement for: "${composerInput.trim()}". Discovering verified professionals in pilot zones.`);
   };
 
   const handleServiceClick = (name: string) => {
-    alert(`Selected category: ${name}. Loading availability in London...`);
+    showNotice(`Exploring ${name} category in active pilot zones.`);
   };
 
   const handleShiftApply = () => {
-    alert("Application submitted for Barista shift at Soho Café! We will notify you when accepted.");
+    showNotice("Demo shift application recorded for preview. Sign up or log in to submit real applications.");
   };
 
   return (
@@ -169,19 +172,26 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Live Indicators */}
+        {interactiveNotice && (
+          <div className="mb-6 p-4 rounded-lg bg-orange-50 border border-orange-200 text-orange-800 text-sm flex items-center justify-between" role="status">
+            <span>{interactiveNotice}</span>
+            <button onClick={() => setInteractiveNotice(null)} className="text-orange-600 font-bold ml-4">✕</button>
+          </div>
+        )}
+
+        {/* Pilot Indicators */}
         <div className="hero-indicators">
           <div className="indicator-item">
             <span className="dot-green"></span>
-            <span>Help available now <strong>2,341 pros online</strong></span>
+            <span>Workforce discovery • <strong>London pilot area</strong></span>
           </div>
           <div className="indicator-item">
             <span className="dot-green"></span>
-            <span>Verified workers nearby <strong>1,287 in London</strong></span>
+            <span>SkillProof verification • <strong>Verified identities</strong></span>
           </div>
           <div className="indicator-item">
             <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span>Example availability today <strong>Shifts across all zones</strong></span>
+            <span>Flexible scheduling • <strong>Shifts across active zones</strong></span>
           </div>
         </div>
       </div>
@@ -193,13 +203,13 @@ export default function Home() {
 
           {/* Card 1: Best Match */}
           <div className="floating-status-card top">
-            <span className="status-card-label">Best match for you</span>
+            <span className="status-card-label">Best match preview</span>
             <div className="status-card-body">
               <img src="/assets/daniel_morgan.jpg" alt="Daniel Morgan" className="mini-avatar" />
               <div>
                 <h5>Daniel Morgan</h5>
                 <p>Plumber</p>
-                <div className="mini-rating">★ 4.9 <span className="muted">• 1,248 jobs</span></div>
+                <div className="mini-rating">★ 4.9 <span className="muted">• Verified WorkPass</span></div>
                 <span className="badge-verified">✔ Verified</span>
               </div>
             </div>
@@ -207,7 +217,7 @@ export default function Home() {
 
           {/* Card 2: Shift Filled */}
           <div className="floating-status-card middle">
-            <span className="status-card-label">Shift filled</span>
+            <span className="status-card-label">Shift capacity preview</span>
             <div className="status-card-body">
               <div className="shift-icon-box">☕</div>
               <div>
@@ -219,20 +229,20 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Card 3: Protected Payment */}
+          {/* Card 3: SkillProof Verified */}
           <div className="floating-status-card bottom">
-            <span className="status-card-label">Protected payment</span>
+            <span className="status-card-label">Verified Work Outcome</span>
             <div className="status-card-body">
               <div className="shield-icon-box">🛡️</div>
               <div>
-                <h5>Payment held securely</h5>
-                <p className="muted">Released when work is complete</p>
-                <span className="badge-protected">Protected</span>
+                <h5>SkillProof Verified</h5>
+                <p className="muted">Audited credentials and proof</p>
+                <span className="badge-protected">Verified</span>
               </div>
             </div>
           </div>
 
-          <div className="concept-note">Example data for concept only</div>
+          <div className="concept-note">Interactive preview &amp; pilot demonstration</div>
         </div>
       </div>
     </div>
@@ -685,7 +695,7 @@ export default function Home() {
             </svg>
             <span className="logo-text">SkillHub</span>
           </a>
-          <p className="brand-sub">The platform for physical work. Services and shifts. Trusted by tens of thousands.</p>
+          <p className="brand-sub">The platform for physical work. Services and shifts. Powered by ATLAS Verified Workforce Infrastructure.</p>
           <div className="social-icons">
             <a href="#">FB</a>
             <a href="#">IG</a>

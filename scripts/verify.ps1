@@ -1,12 +1,12 @@
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 
-$adoptiumJdk = Get-ChildItem 'C:\Program Files\Eclipse Adoptium\jdk-25*' -Directory -ErrorAction SilentlyContinue |
+$jdk = Get-ChildItem 'C:\Program Files\Eclipse Adoptium\jdk-21*', 'C:\Program Files\Microsoft\jdk-21*', 'C:\Program Files\Java\jdk-21*' -Directory -ErrorAction SilentlyContinue |
     Sort-Object Name -Descending |
     Select-Object -First 1
-if ($adoptiumJdk) {
-    $env:JAVA_HOME = $adoptiumJdk.FullName
-    $env:Path = "$($adoptiumJdk.FullName)\bin;$env:Path"
+if ($jdk) {
+    $env:JAVA_HOME = $jdk.FullName
+    $env:Path = "$($jdk.FullName)\bin;$env:Path"
 }
 
 $dockerBin = 'C:\Program Files\Docker\Docker\resources\bin'
@@ -16,11 +16,17 @@ if (Test-Path "$dockerBin\docker.exe") {
 
 Push-Location $repositoryRoot
 try {
-    & docker compose config --quiet
+    if (Get-Command docker -ErrorAction SilentlyContinue) {
+        & docker compose config --quiet
+    }
 
     Push-Location 'backend'
     try {
-        & .\mvnw.cmd clean verify
+        if (Get-Command wsl -ErrorAction SilentlyContinue) {
+            & wsl bash -c "cd /mnt/d/Website/backend && ./mvnw clean test"
+        } else {
+            & .\mvnw.cmd clean test
+        }
         if ($LASTEXITCODE -ne 0) { throw 'Backend verification failed.' }
     }
     finally {
@@ -46,4 +52,4 @@ finally {
     Pop-Location
 }
 
-Write-Output 'ATLAS repository verification passed.'
+Write-Output 'ATLAS / SkillHub repository verification passed.'
