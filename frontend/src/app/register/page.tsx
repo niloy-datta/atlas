@@ -43,7 +43,7 @@ function RegisterContent() {
     setLoading(true);
     try {
       await signUpWithEmail(email, password, accountType);
-      router.push("/");
+      router.push(`/onboarding/${accountType}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Registration failed";
       setLocalError(message);
@@ -58,7 +58,7 @@ function RegisterContent() {
     setLoading(true);
     try {
       await signInWithGoogle(accountType);
-      router.push("/");
+      router.push(`/onboarding/${accountType}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Google sign-up failed";
       setLocalError(message);

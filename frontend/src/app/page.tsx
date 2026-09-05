@@ -79,6 +79,12 @@ export default function Home() {
         </div>
         {firebaseUser ? (
           <div className="flex items-center gap-3">
+            <Link
+              href={atlasUser?.roles?.some((r) => r.includes("EMPLOYER")) ? "/dashboard/employer" : "/dashboard/worker"}
+              className="px-3 py-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 rounded-lg text-sm font-semibold transition-colors"
+            >
+              Go to Dashboard →
+            </Link>
             <div className="user-badge" data-testid="user-profile-badge">
               <span>{atlasUser?.email || firebaseUser.email}</span>
               {atlasUser?.roles?.[0] && (

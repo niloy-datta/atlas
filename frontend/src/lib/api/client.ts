@@ -116,6 +116,16 @@ export const atlasApi = {
       requireAuth,
     ),
 
+  patch: <T>(path: string, body?: unknown, requireAuth = true) =>
+    request<T>(
+      path,
+      {
+        method: "PATCH",
+        body: body ? JSON.stringify(body) : undefined,
+      },
+      requireAuth,
+    ),
+
   delete: <T>(path: string, requireAuth = true) =>
     request<T>(path, { method: "DELETE" }, requireAuth),
 

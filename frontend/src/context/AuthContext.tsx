@@ -14,7 +14,7 @@ import {
 } from "../lib/firebase/auth";
 import { atlasApi, type AtlasUser, ApiError } from "../lib/api/client";
 
-interface AuthContextType {
+export interface AuthContextType {
   firebaseUser: User | null;
   atlasUser: AtlasUser | null;
   loading: boolean;
