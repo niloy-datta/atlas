@@ -16,6 +16,19 @@ import {
 } from "../../../lib/api/organizations";
 import { listOrganizationJobs, JobSummary } from "../../../lib/api/jobs";
 import { listOrganizationShifts, ShiftSummaryView } from "../../../lib/api/shifts";
+import {
+  getOrganizationApplications,
+  reviewApplication,
+  shortlistApplication,
+  acceptApplication,
+  rejectApplication,
+  ApplicationSummary,
+} from "../../../lib/api/applications";
+import {
+  getOrganizationInvitations,
+  cancelInvitation,
+  InvitationSummary,
+} from "../../../lib/api/invitations";
 
 export default function EmployerDashboardPage() {
   const { firebaseUser, atlasUser, loading: authLoading, signOut } = useAuth();
@@ -27,6 +40,9 @@ export default function EmployerDashboardPage() {
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [jobs, setJobs] = useState<JobSummary[]>([]);
   const [shifts, setShifts] = useState<ShiftSummaryView[]>([]);
+  const [applications, setApplications] = useState<ApplicationSummary[]>([]);
+  const [invitations, setInvitations] = useState<InvitationSummary[]>([]);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,12 +64,14 @@ export default function EmployerDashboardPage() {
         }
 
         const activeId = orgList[0].id;
-        const [orgDetail, locs, mems, jobPage, shiftPage] = await Promise.all([
+        const [orgDetail, locs, mems, jobPage, shiftPage, apps, invs] = await Promise.all([
           getOrganization(activeId).catch(() => null),
           listOrganizationLocations(activeId).catch(() => []),
           listOrganizationMembers(activeId).catch(() => []),
           listOrganizationJobs(activeId).catch(() => ({ items: [], total: 0, page: 0, size: 20 })),
           listOrganizationShifts(activeId, { size: 20 }).catch(() => ({ items: [], total: 0, page: 0, size: 20 })),
+          getOrganizationApplications(activeId).catch(() => []),
+          getOrganizationInvitations(activeId).catch(() => []),
         ]);
 
         setSelectedOrg(orgDetail);
@@ -61,6 +79,8 @@ export default function EmployerDashboardPage() {
         setMembers(mems);
         setJobs(jobPage.items);
         setShifts(shiftPage.items);
+        setApplications(apps);
+        setInvitations(invs);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load employer dashboard");
       } finally {
@@ -72,6 +92,45 @@ export default function EmployerDashboardPage() {
       loadEmployerData();
     }
   }, [firebaseUser, authLoading, router]);
+
+  const handleAppTransition = async (
+    applicationId: string,
+    version: number,
+    action: "review" | "shortlist" | "accept" | "reject"
+  ) => {
+    if (!selectedOrg) return;
+    setActionError(null);
+    try {
+      let updated;
+      if (action === "review") {
+        updated = await reviewApplication(selectedOrg.id, applicationId, version);
+      } else if (action === "shortlist") {
+        updated = await shortlistApplication(selectedOrg.id, applicationId, version);
+      } else if (action === "accept") {
+        updated = await acceptApplication(selectedOrg.id, applicationId, version);
+      } else {
+        updated = await rejectApplication(selectedOrg.id, applicationId, version);
+      }
+      setApplications((prev) =>
+        prev.map((app) => (app.id === applicationId ? { ...app, status: updated.status, version: updated.version } : app))
+      );
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : "Failed to update application status");
+    }
+  };
+
+  const handleCancelInv = async (invitationId: string, version: number) => {
+    if (!selectedOrg) return;
+    setActionError(null);
+    try {
+      const updated = await cancelInvitation(selectedOrg.id, invitationId, version);
+      setInvitations((prev) =>
+        prev.map((inv) => (inv.id === invitationId ? { ...inv, status: updated.status, version: updated.version } : inv))
+      );
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : "Failed to cancel invitation");
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -174,8 +233,164 @@ export default function EmployerDashboardPage() {
 
         {/* 2 Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Shifts, Jobs & Locations */}
+          {/* Left Column: Applications, Shifts & Jobs */}
           <div className="lg:col-span-2 space-y-8">
+            {actionError && (
+              <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium">
+                ⚠️ {actionError}
+              </div>
+            )}
+
+            {/* Applicant Pipeline Card */}
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4 border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">👥</span>
+                  <h2 className="font-bold text-slate-900">Applicant Pipeline ({applications.length})</h2>
+                </div>
+                <span className="text-xs text-slate-500 font-medium">
+                  {applications.filter((a) => a.status === "SUBMITTED" || a.status === "UNDER_REVIEW").length} pending review
+                </span>
+              </div>
+
+              {applications.length === 0 ? (
+                <div className="text-center py-6 text-slate-500 text-sm">
+                  <p>No applications received yet.</p>
+                  <p className="text-xs text-slate-400 mt-0.5">When verified workers apply to your jobs or shifts, they appear here.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {applications.map((app) => (
+                    <div
+                      key={app.id}
+                      className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 text-sm">{app.workerName}</span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold">
+                            {app.targetType}
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-600 mt-1">
+                          Applied for: <span className="font-semibold text-slate-900">{app.targetTitle}</span>
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-3">
+                          {app.proposedRatePence && <span>Rate: £{(app.proposedRatePence / 100).toFixed(2)}</span>}
+                          <span>{new Date(app.createdAt).toLocaleDateString()}</span>
+                          <span
+                            className={`font-semibold px-2 py-0.5 rounded text-[11px] ${
+                              app.status === "ACCEPTED"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : app.status === "SHORTLISTED"
+                                ? "bg-blue-100 text-blue-800"
+                                : app.status === "UNDER_REVIEW"
+                                ? "bg-amber-100 text-amber-800"
+                                : app.status === "REJECTED"
+                                ? "bg-red-100 text-red-800"
+                                : app.status === "WITHDRAWN"
+                                ? "bg-slate-200 text-slate-600"
+                                : "bg-orange-100 text-orange-800"
+                            }`}
+                          >
+                            {app.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        {app.status === "SUBMITTED" && (
+                          <button
+                            type="button"
+                            onClick={() => handleAppTransition(app.id, app.version, "review")}
+                            className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-bold transition"
+                          >
+                            Review
+                          </button>
+                        )}
+                        {(app.status === "SUBMITTED" || app.status === "UNDER_REVIEW") && (
+                          <button
+                            type="button"
+                            onClick={() => handleAppTransition(app.id, app.version, "shortlist")}
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition shadow-sm"
+                          >
+                            Shortlist
+                          </button>
+                        )}
+                        {(app.status === "SUBMITTED" || app.status === "UNDER_REVIEW" || app.status === "SHORTLISTED") && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleAppTransition(app.id, app.version, "accept")}
+                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-sm"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleAppTransition(app.id, app.version, "reject")}
+                              className="px-3 py-1.5 border border-slate-300 hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-slate-600 rounded-lg text-xs font-medium transition"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Invitations Sent Card */}
+            {invitations.length > 0 && (
+              <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between mb-4 border-b pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">✉️</span>
+                    <h2 className="font-bold text-slate-900">Invitations Sent ({invitations.length})</h2>
+                  </div>
+                  <span className="text-xs text-slate-500 font-medium">Direct Worker Invites</span>
+                </div>
+
+                <div className="space-y-3">
+                  {invitations.map((inv) => (
+                    <div
+                      key={inv.id}
+                      className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 text-sm">{inv.workerName}</span>
+                          <span className="text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-800 font-semibold">
+                            {inv.targetType}
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-600 mt-1">
+                          Invited to: <span className="font-semibold text-slate-900">{inv.targetTitle}</span>
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-3">
+                          {inv.offeredRatePence && <span>Rate: £{(inv.offeredRatePence / 100).toFixed(2)}</span>}
+                          <span>Expires: {new Date(inv.expiresAt).toLocaleDateString()}</span>
+                          <span className="font-semibold text-slate-700">Status: {inv.status}</span>
+                        </div>
+                      </div>
+
+                      {inv.status === "PENDING" && (
+                        <button
+                          type="button"
+                          onClick={() => handleCancelInv(inv.id, inv.version)}
+                          className="px-3 py-1.5 border border-slate-300 hover:bg-red-50 hover:text-red-700 text-slate-600 rounded-lg text-xs font-medium transition"
+                        >
+                          Cancel Invite
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Scheduled Shifts */}
             <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
               <div className="flex items-center justify-between mb-4 border-b pb-3">

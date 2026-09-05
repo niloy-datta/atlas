@@ -22,10 +22,12 @@ try {
 
     Push-Location 'backend'
     try {
-        if (Get-Command wsl -ErrorAction SilentlyContinue) {
-            & wsl bash -c "cd /mnt/d/Website/backend && ./mvnw clean test"
+        if ($IsWindows -or $env:OS -like "*Windows*") {
+            & .\mvnw.cmd test
+        } elseif (Get-Command ./mvnw -ErrorAction SilentlyContinue) {
+            & ./mvnw test
         } else {
-            & .\mvnw.cmd clean test
+            & mvn test
         }
         if ($LASTEXITCODE -ne 0) { throw 'Backend verification failed.' }
     }

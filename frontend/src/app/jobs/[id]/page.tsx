@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { getPublicJob, JobDetail } from "../../../lib/api/jobs";
+import { applyToJob } from "../../../lib/api/applications";
+import ApplyModal from "../../../components/applications/ApplyModal";
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -16,6 +18,7 @@ export default function JobDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [applySuccess, setApplySuccess] = useState(false);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   useEffect(() => {
     if (!jobId) return;
@@ -51,7 +54,11 @@ export default function JobDetailPage() {
       router.push(`/login?redirect=/jobs/${jobId}`);
       return;
     }
-    // Phase 4 Applications readiness
+    setIsApplyModalOpen(true);
+  };
+
+  const handleApplySubmit = async (coverNote: string, proposedRatePence?: number) => {
+    await applyToJob(jobId, { coverNote, proposedRatePence });
     setApplySuccess(true);
   };
 
@@ -279,6 +286,18 @@ export default function JobDetailPage() {
           </div>
         </div>
       </main>
+
+      {job && (
+        <ApplyModal
+          isOpen={isApplyModalOpen}
+          onClose={() => setIsApplyModalOpen(false)}
+          targetTitle={job.title}
+          targetType="JOB"
+          currency={job.currency}
+          defaultRatePence={job.budgetMinPence}
+          onSubmit={handleApplySubmit}
+        />
+      )}
     </div>
   );
 }

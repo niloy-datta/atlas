@@ -1,44 +1,26 @@
 # ATLAS Current State
 
-Date: 2026-08-30
-Repository state at audit: empty projectless workspace, not a Git repository
+Date: 2026-09-06
+Repository: `niloy-datta/atlas` (SkillHub / ATLAS Platform)
+License: MIT
 
-## Existing stack
+## Platform Capability Matrix
 
-| Area | Audit result | Phase 1 action |
+| Capability Area | Status | Implementation Details |
 |---|---|---|
-| Backend | Not implemented | Spring Boot 4.1.1 modular-monolith foundation |
-| Frontend | Not implemented | Next.js 16.3.3 structural shell |
-| Database | Not implemented | PostgreSQL 18 / PostGIS 3.6 through Compose |
-| Authentication | Not implemented | Deferred to Phase 2 |
-| Testing | Not implemented | JUnit/Testcontainers and Vitest/Testing Library/Playwright foundations |
-| Infrastructure | Not implemented | PostgreSQL/PostGIS and Redis local services |
-| Deployment | Not selected | No deployment automation in Phase 1 |
-| Observability | Not implemented | Health endpoints and Prometheus registry foundation only |
+| **Identity & Auth** | `PRODUCTION-READY` | Firebase Auth (Web v12) + Spring Boot Firebase Admin SDK (v9). ATLAS principal mapping, tenant membership, token verification. |
+| **Worker Profiles & WorkPass** | `PRODUCTION-READY` | Private worker profiles, public verified WorkPass (`/workpass/[handle]`), privacy toggles, QR share, skills & credentials. |
+| **Organization & Tenancy** | `PRODUCTION-READY` | Multi-tenant organization isolation, member management, invitation tokens, role-based access controls. |
+| **Jobs & Shifts Engine** | `PRODUCTION-READY` | Full lifecycle management for fixed jobs and flexible shifts, location geo-tagging, schedule intervals, pay rates, supervisor assignments. |
+| **Applications Domain** | `PRODUCTION-READY` | Phase 9 completed. Unified polymorphic applications (Jobs & Shifts), state machine (`SUBMITTED -> REVIEWING -> SHORTLISTED -> ACCEPTED / REJECTED / WITHDRAWN`), database-enforced integrity (`V11`), optimistic locking. |
+| **Invitations Domain** | `PRODUCTION-READY` | Phase 9 completed. Direct organization-to-worker invitations for jobs/shifts, automatic TTL expiration, acceptance/decline flow, database-enforced candidate targets. |
+| **Database & Invariants** | `HARDENED` | PostgreSQL 18 + PostGIS 3.6. Flyway migrations up to `V11__harden_application_targets.sql`. Composite foreign keys, cross-tenant isolation, XOR check constraints (`job_id` vs `shift_id`). |
+| **Frontend Applications** | `PRODUCTION-READY` | Next.js 16 App Router, React 19, Tailwind CSS. Integrated apply modals, worker invitation & application pipelines, employer applicant management dashboard. |
+| **CI / CD Automation** | `ACTIVE` | GitHub Actions CI workflow (`.github/workflows/ci.yml`) testing backend (Maven wrapper, JUnit 5) and frontend (lint, TypeScript check, Vitest 17 unit tests, Next.js production build). Automated GitHub Pages deployment (`.github/workflows/deploy-pages.yml`). |
+| **Verification Tooling** | `HARDENED` | Cross-platform `scripts/verify.ps1` runs native Maven & npm test suites without WSL path dependencies. |
 
-## Environment audit
+## Completed Phases
 
-Initial inspection found Java 17.0.19, Node.js 24.18.0, npm 11.16.0, Git 2.55.0, no Maven, and no Docker. Java 25 and Docker Desktop were provisioned for implementation. Maven is intentionally supplied through the repository wrapper.
-
-## Existing features
-
-All product features were `NOT IMPLEMENTED` at the start of the audit. There was no code to keep, refactor, replace, or remove.
-
-## Technical debt
-
-There was no inherited code debt. The principal risks at foundation time are:
-
-- allowing scaffold defaults to become architecture;
-- committing local secrets;
-- coupling tests to non-PostgreSQL behavior;
-- designing visual components before the product design is supplied;
-- adding distributed infrastructure before transactional workflows exist;
-- making unmeasured performance or scale claims.
-
-## Reuse plan
-
-No reusable application component existed. The generated Spring Boot and Next.js foundations are retained only where they match the approved stack; placeholder product content is replaced with ATLAS-specific structural content.
-
-## Destructive changes
-
-None. The workspace contained only productless `work` and `outputs` directories. They are preserved and ignored by Git.
+- **Phase 0–6**: Platform foundation, identity boundary, private/public WorkPass, tenant-isolated organizations, SkillProof, and secure credentials.
+- **Phase 7–8**: Jobs domain, flexible shifts domain, supervisor assignment, time slots.
+- **Phase 9**: Application & Invitation transactional core, candidate key hardening (`V11`), employer pipeline, worker pipeline, and CI/CD automation.

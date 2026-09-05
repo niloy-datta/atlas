@@ -11,11 +11,12 @@ Verified Workforce Infrastructure & Flexible Shift Platform
 
 ## Architecture & Status
 
-Phases 0–6 establish the repository, platform foundation, identity boundary, private/public WorkPass, tenant-isolated organizations, SkillProof, and secure credentials.
+Phases 0–9 establish the platform foundation, identity boundary, private/public WorkPass, tenant-isolated organizations, SkillProof, credentials, jobs, flexible shifts, applications, and direct invitations.
 - **Identity Provider**: Firebase Authentication handles user credentials, Google OAuth, password reset, and short-lived ID tokens.
-- **Domain Authority**: ATLAS (Spring Boot + PostgreSQL) cryptographically verifies Firebase ID tokens, maps Firebase UIDs to internal Atlas UUIDs, and enforces business authorization, tenant isolation, and role policies.
+- **Domain Authority**: ATLAS (Spring Boot + PostgreSQL) cryptographically verifies Firebase ID tokens, maps Firebase UIDs to internal Atlas UUIDs, and enforces business authorization, tenant isolation, role policies, and state transitions.
+- **Applications & Invitations**: Transactional matching engine enforcing relational candidate targets (Jobs & Shifts), XOR constraints, worker profile verification, and full lifecycle state machines.
 - **Credential Storage**: MinIO / S3-compatible storage with short-lived signed URLs and file signature checks.
-- **Frontend**: Next.js App Router, React 19, Tailwind CSS, and strict TypeScript.
+- **Frontend**: Next.js App Router, React 19, Tailwind CSS, and strict TypeScript. Live demo hosted on GitHub Pages: [https://niloy-datta.github.io/atlas/](https://niloy-datta.github.io/atlas/).
 
 ## Stack
 

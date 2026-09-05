@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { getPublicShift, ShiftDetailView } from "../../../lib/api/shifts";
+import { applyToShift } from "../../../lib/api/applications";
+import ApplyModal from "../../../components/applications/ApplyModal";
 
 export default function ShiftDetailPage() {
   const params = useParams();
@@ -16,6 +18,7 @@ export default function ShiftDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [applySuccess, setApplySuccess] = useState(false);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   useEffect(() => {
     if (!shiftId) return;
@@ -87,6 +90,11 @@ export default function ShiftDetailPage() {
       router.push(`/login?redirect=/shifts/${shiftId}`);
       return;
     }
+    setIsApplyModalOpen(true);
+  };
+
+  const handleApplySubmit = async (coverNote: string, proposedRatePence?: number) => {
+    await applyToShift(shiftId, { coverNote, proposedRatePence });
     setApplySuccess(true);
   };
 
@@ -334,6 +342,18 @@ export default function ShiftDetailPage() {
           </div>
         </div>
       </main>
+
+      {shift && (
+        <ApplyModal
+          isOpen={isApplyModalOpen}
+          onClose={() => setIsApplyModalOpen(false)}
+          targetTitle={shift.title}
+          targetType="SHIFT"
+          currency={shift.currency}
+          defaultRatePence={shift.hourlyRatePence}
+          onSubmit={handleApplySubmit}
+        />
+      )}
     </div>
   );
 }

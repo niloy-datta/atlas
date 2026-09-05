@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { getWorkerProfile, getPrivateWorkPass, PrivateProfile, PrivateWorkPass } from "../../../lib/api/workers";
+import { getMyApplications, withdrawApplication, ApplicationSummary } from "../../../lib/api/applications";
+import { getMyInvitations, acceptInvitation, declineInvitation, InvitationSummary } from "../../../lib/api/invitations";
 
 export default function WorkerDashboardPage() {
   const { firebaseUser, atlasUser, loading: authLoading, signOut } = useAuth();
@@ -12,6 +14,9 @@ export default function WorkerDashboardPage() {
 
   const [profile, setProfile] = useState<PrivateProfile | null>(null);
   const [workPass, setWorkPass] = useState<PrivateWorkPass | null>(null);
+  const [applications, setApplications] = useState<ApplicationSummary[]>([]);
+  const [invitations, setInvitations] = useState<InvitationSummary[]>([]);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,9 +29,11 @@ export default function WorkerDashboardPage() {
     async function loadDashboard() {
       try {
         setLoading(true);
-        const [prof, wp] = await Promise.all([
+        const [prof, wp, apps, invs] = await Promise.all([
           getWorkerProfile().catch(() => null),
           getPrivateWorkPass().catch(() => null),
+          getMyApplications().catch(() => []),
+          getMyInvitations().catch(() => []),
         ]);
 
         if (!prof) {
@@ -36,6 +43,8 @@ export default function WorkerDashboardPage() {
 
         setProfile(prof);
         setWorkPass(wp);
+        setApplications(apps);
+        setInvitations(invs);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load dashboard");
       } finally {
@@ -47,6 +56,42 @@ export default function WorkerDashboardPage() {
       loadDashboard();
     }
   }, [firebaseUser, authLoading, router]);
+
+  const handleWithdraw = async (applicationId: string, version: number) => {
+    setActionError(null);
+    try {
+      const updated = await withdrawApplication(applicationId, version);
+      setApplications((prev) =>
+        prev.map((app) => (app.id === applicationId ? { ...app, status: updated.status, version: updated.version } : app))
+      );
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : "Failed to withdraw application");
+    }
+  };
+
+  const handleAcceptInvitation = async (invitationId: string, version: number) => {
+    setActionError(null);
+    try {
+      const updated = await acceptInvitation(invitationId, version);
+      setInvitations((prev) =>
+        prev.map((inv) => (inv.id === invitationId ? { ...inv, status: updated.status, version: updated.version } : inv))
+      );
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : "Failed to accept invitation");
+    }
+  };
+
+  const handleDeclineInvitation = async (invitationId: string, version: number) => {
+    setActionError(null);
+    try {
+      const updated = await declineInvitation(invitationId, version);
+      setInvitations((prev) =>
+        prev.map((inv) => (inv.id === invitationId ? { ...inv, status: updated.status, version: updated.version } : inv))
+      );
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : "Failed to decline invitation");
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -173,8 +218,149 @@ export default function WorkerDashboardPage() {
 
         {/* 2 Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Skills & Credentials */}
+          {/* Left Column: Invitations, Applications, Skills & Credentials */}
           <div className="lg:col-span-2 space-y-8">
+            {actionError && (
+              <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium">
+                ⚠️ {actionError}
+              </div>
+            )}
+
+            {/* Invitations Card */}
+            {invitations.length > 0 && (
+              <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between mb-4 border-b pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📩</span>
+                    <h2 className="font-bold text-slate-900">Direct Employer Invitations ({invitations.length})</h2>
+                  </div>
+                  <span className="text-xs px-2.5 py-1 bg-orange-100 text-orange-800 font-bold rounded-full">
+                    Action Required
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {invitations.map((inv) => (
+                    <div
+                      key={inv.id}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-800">
+                            {inv.targetType}
+                          </span>
+                          <span className="font-bold text-slate-900 text-sm">{inv.targetTitle}</span>
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-3">
+                          {inv.offeredRatePence && (
+                            <span>Rate: £{(inv.offeredRatePence / 100).toFixed(2)}</span>
+                          )}
+                          <span>Expires: {new Date(inv.expiresAt).toLocaleDateString()}</span>
+                          <span className="font-semibold text-slate-700">Status: {inv.status}</span>
+                        </div>
+                      </div>
+
+                      {inv.status === "PENDING" && (
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <button
+                            type="button"
+                            onClick={() => handleAcceptInvitation(inv.id, inv.version)}
+                            className="flex-1 sm:flex-initial px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-sm"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeclineInvitation(inv.id, inv.version)}
+                            className="flex-1 sm:flex-initial px-3 py-1.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium transition"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* My Applications Card */}
+            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4 border-b pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">📋</span>
+                  <h2 className="font-bold text-slate-900">My Applications ({applications.length})</h2>
+                </div>
+                <Link href="/jobs" className="text-sm text-orange-600 hover:text-orange-700 font-semibold">
+                  Find More +
+                </Link>
+              </div>
+
+              {applications.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  <p className="text-sm">No applications submitted yet.</p>
+                  <p className="text-xs mt-1">Browse jobs and shifts to apply with your verified WorkPass.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {applications.map((app) => (
+                    <div
+                      key={app.id}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-800">
+                            {app.targetType}
+                          </span>
+                          <Link
+                            href={app.targetType === "JOB" ? `/jobs/${app.targetId}` : `/shifts/${app.targetId}`}
+                            className="font-bold text-slate-900 hover:text-orange-600 text-sm transition"
+                          >
+                            {app.targetTitle}
+                          </Link>
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1 flex items-center gap-3">
+                          {app.proposedRatePence && (
+                            <span>Proposed: £{(app.proposedRatePence / 100).toFixed(2)}</span>
+                          )}
+                          <span>Submitted: {new Date(app.createdAt).toLocaleDateString()}</span>
+                          <span
+                            className={`font-semibold px-2 py-0.5 rounded text-[11px] ${
+                              app.status === "ACCEPTED"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : app.status === "SHORTLISTED"
+                                ? "bg-blue-100 text-blue-800"
+                                : app.status === "UNDER_REVIEW"
+                                ? "bg-amber-100 text-amber-800"
+                                : app.status === "REJECTED"
+                                ? "bg-red-100 text-red-800"
+                                : app.status === "WITHDRAWN"
+                                ? "bg-slate-200 text-slate-600"
+                                : "bg-orange-100 text-orange-800"
+                            }`}
+                          >
+                            {app.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      {(app.status === "SUBMITTED" || app.status === "UNDER_REVIEW" || app.status === "SHORTLISTED") && (
+                        <button
+                          type="button"
+                          onClick={() => handleWithdraw(app.id, app.version)}
+                          className="px-3 py-1.5 border border-slate-300 hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-slate-600 rounded-lg text-xs font-medium transition"
+                        >
+                          Withdraw
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Skills Card */}
             <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
               <div className="flex items-center justify-between mb-4 border-b pb-3">
