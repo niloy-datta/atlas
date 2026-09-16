@@ -23,11 +23,11 @@ export default function ProfilePage() {
   const [experienceYears, setExperienceYears] = useState(1);
   const [visibility, setVisibility] = useState<ProfileVisibility>("PUBLIC");
 
-  const [city, setCity] = useState("London");
-  const [region, setRegion] = useState("Greater London");
-  const [countryCode, setCountryCode] = useState("GB");
-  const [latitude, setLatitude] = useState(51.5074);
-  const [longitude, setLongitude] = useState(-0.1278);
+  const [city, setCity] = useState("Dhaka");
+  const [region, setRegion] = useState("Dhaka Division");
+  const [countryCode, setCountryCode] = useState("BD");
+  const [latitude, setLatitude] = useState(23.8103);
+  const [longitude, setLongitude] = useState(90.4125);
 
   const [openToWork, setOpenToWork] = useState(true);
   const [maxDistanceKm, setMaxDistanceKm] = useState(25);
@@ -51,9 +51,9 @@ export default function ProfilePage() {
         setExperienceYears(p.experienceYears || 1);
         setVisibility(p.visibility || "PUBLIC");
         if (p.location) {
-          setCity(p.location.city || "London");
-          setRegion(p.location.region || "Greater London");
-          setCountryCode(p.location.countryCode || "GB");
+          setCity(p.location.city || "Dhaka");
+          setRegion(p.location.region || "Dhaka Division");
+          setCountryCode(p.location.countryCode || "BD");
           setLatitude(p.location.latitude);
           setLongitude(p.location.longitude);
         }

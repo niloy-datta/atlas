@@ -93,6 +93,6 @@ describe("Phase 1: Onboarding and Profile Flows", () => {
     });
 
     expect(screen.getByText("Step 1: Create Organization")).toBeDefined();
-    expect(screen.getByPlaceholderText("Soho Café & Bakery")).toBeDefined();
+    expect(screen.getByPlaceholderText("Artisan Roast Roastery")).toBeDefined();
   });
 });

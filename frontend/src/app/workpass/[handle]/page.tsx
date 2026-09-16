@@ -79,7 +79,7 @@ export default function PublicWorkPassPage() {
               <h1 className="text-2xl font-bold text-slate-900">{workPass.displayName || workPass.handle}</h1>
               <p className="text-slate-600 font-medium text-sm mt-0.5">{workPass.headline || "Physical Work Professional"}</p>
               <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
-                <span>📍 {workPass.coarseLocation || "London, UK"}</span>
+                <span>📍 {workPass.coarseLocation || "Dhaka, BD"}</span>
                 <span>•</span>
                 <span>⏱️ {workPass.experienceYears || 1} years experience</span>
                 <span>•</span>

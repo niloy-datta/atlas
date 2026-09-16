@@ -35,13 +35,13 @@ export default function CreateJobPage() {
   const [jobType, setJobType] = useState<JobType>("SHIFT");
   const [budgetMin, setBudgetMin] = useState<string>("200");
   const [budgetMax, setBudgetMax] = useState<string>("300");
-  const [currency, setCurrency] = useState("GBP");
+  const [currency, setCurrency] = useState("BDT");
 
   // Step 2: Location
-  const [locationName, setLocationName] = useState("Central London Depot");
-  const [formattedAddress, setFormattedAddress] = useState("10 Berkeley Square, London W1J 6AA");
-  const [latitude, setLatitude] = useState(51.5098);
-  const [longitude, setLongitude] = useState(-0.1465);
+  const [locationName, setLocationName] = useState("Dhaka Central Distribution Depot");
+  const [formattedAddress, setFormattedAddress] = useState("House 42, Road 27, Dhanmondi, Dhaka 1209");
+  const [latitude, setLatitude] = useState(23.7509);
+  const [longitude, setLongitude] = useState(90.3705);
 
   // Step 3: Skills & Credentials
   const [selectedSkillId, setSelectedSkillId] = useState("");
@@ -397,7 +397,7 @@ export default function CreateJobPage() {
                   type="text"
                   value={formattedAddress}
                   onChange={(e) => setFormattedAddress(e.target.value)}
-                  placeholder="e.g. 10 Berkeley Square, London W1J 6AA"
+                  placeholder="e.g. House 42, Road 27, Dhanmondi, Dhaka 1209"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-orange-500 text-slate-900 text-sm"
                 />
               </div>

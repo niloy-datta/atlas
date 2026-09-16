@@ -26,11 +26,11 @@ export default function WorkerOnboardingPage() {
   const [visibility, setVisibility] = useState<ProfileVisibility>("PUBLIC");
 
   // Location & Preferences
-  const [city, setCity] = useState("London");
-  const [region, setRegion] = useState("Greater London");
-  const [countryCode, setCountryCode] = useState("GB");
-  const [latitude, setLatitude] = useState(51.5074);
-  const [longitude, setLongitude] = useState(-0.1278);
+  const [city, setCity] = useState("Dhaka");
+  const [region, setRegion] = useState("Dhaka Division");
+  const [countryCode, setCountryCode] = useState("BD");
+  const [latitude, setLatitude] = useState(23.8103);
+  const [longitude, setLongitude] = useState(90.4125);
   const [openToWork, setOpenToWork] = useState(true);
   const [maxDistanceKm, setMaxDistanceKm] = useState(25);
   const [jobTypes, setJobTypes] = useState<JobTypePreference[]>(["SHIFT", "SERVICE"]);
@@ -62,9 +62,9 @@ export default function WorkerOnboardingPage() {
             setExperienceYears(profile.experienceYears || 1);
             setVisibility(profile.visibility || "PUBLIC");
             if (profile.location) {
-              setCity(profile.location.city || "London");
-              setRegion(profile.location.region || "Greater London");
-              setCountryCode(profile.location.countryCode || "GB");
+              setCity(profile.location.city || "Dhaka");
+              setRegion(profile.location.region || "Dhaka Division");
+              setCountryCode(profile.location.countryCode || "BD");
               setLatitude(profile.location.latitude);
               setLongitude(profile.location.longitude);
             }

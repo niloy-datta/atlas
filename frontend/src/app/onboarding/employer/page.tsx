@@ -28,9 +28,9 @@ export default function EmployerOnboardingPage() {
 
   // Location State
   const [locationName, setLocationName] = useState("Headquarters / Main Venue");
-  const [formattedAddress, setFormattedAddress] = useState("45 Dean Street, Soho, London W1D 4QB");
-  const [latitude, setLatitude] = useState(51.5134);
-  const [longitude, setLongitude] = useState(-0.1332);
+  const [formattedAddress, setFormattedAddress] = useState("House 42, Road 27, Dhanmondi, Dhaka 1209");
+  const [latitude, setLatitude] = useState(23.7509);
+  const [longitude, setLongitude] = useState(90.3705);
 
   useEffect(() => {
     if (!authLoading && !firebaseUser) {
@@ -188,7 +188,7 @@ export default function EmployerOnboardingPage() {
                       setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-"));
                     }
                   }}
-                  placeholder="Soho Café &amp; Bakery"
+                  placeholder="Artisan Roast Roastery"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
                 />
               </div>
@@ -202,7 +202,7 @@ export default function EmployerOnboardingPage() {
                     required
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
-                    placeholder="soho-cafe"
+                    placeholder="artisan-roast"
                     className="flex-1 px-3 py-2 outline-none text-slate-900"
                   />
                 </div>
@@ -214,7 +214,7 @@ export default function EmployerOnboardingPage() {
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Artisanal café and bakery located in central London..."
+                  placeholder="Specialty café and bakery located in Dhanmondi, Dhaka..."
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
                 />
               </div>
@@ -226,7 +226,7 @@ export default function EmployerOnboardingPage() {
                   onClick={handleCreateOrg}
                   className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
-                  {saving ? "Creating..." : "Save &amp; Add Location →"}
+                  {saving ? "Creating..." : "Save & Add Location →"}
                 </button>
               </div>
             </div>
@@ -256,7 +256,7 @@ export default function EmployerOnboardingPage() {
                   required
                   value={formattedAddress}
                   onChange={(e) => setFormattedAddress(e.target.value)}
-                  placeholder="45 Dean Street, Soho, London W1D 4QB"
+                  placeholder="House 42, Road 27, Dhanmondi, Dhaka 1209"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"
                 />
               </div>

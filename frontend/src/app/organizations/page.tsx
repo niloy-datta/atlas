@@ -328,7 +328,7 @@ export default function OrganizationsPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. 12 Long Acre, London WC2E 9LH"
+                  placeholder="e.g. House 42, Road 27, Dhanmondi, Dhaka 1209"
                   value={locAddress}
                   onChange={(e) => setLocAddress(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-600 text-slate-900"

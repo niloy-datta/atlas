@@ -49,13 +49,13 @@ export default function CreateShiftPage() {
 
   const [startTimeLocal, setStartTimeLocal] = useState<string>(getDefaultDateTime(1, 8));
   const [endTimeLocal, setEndTimeLocal] = useState<string>(getDefaultDateTime(1, 16));
-  const [timezone, setTimezone] = useState("Europe/London");
+  const [timezone, setTimezone] = useState("Asia/Dhaka");
 
   // Step 3: Location
-  const [locationName, setLocationName] = useState("Central Logistics Hub");
-  const [formattedAddress, setFormattedAddress] = useState("10 Berkeley Square, London W1J 6AA");
-  const [latitude, setLatitude] = useState(51.5098);
-  const [longitude, setLongitude] = useState(-0.1465);
+  const [locationName, setLocationName] = useState("Dhanmondi Central Depot");
+  const [formattedAddress, setFormattedAddress] = useState("Road 27, Dhanmondi, Dhaka 1209");
+  const [latitude, setLatitude] = useState(23.7509);
+  const [longitude, setLongitude] = useState(90.3705);
 
   // Step 4: Skills & Credentials
   const [selectedSkillId, setSelectedSkillId] = useState("");
@@ -454,10 +454,9 @@ export default function CreateShiftPage() {
                 onChange={(e) => setTimezone(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 bg-white text-sm"
               >
+                <option value="Asia/Dhaka">Asia/Dhaka (BST / UTC+6)</option>
                 <option value="Europe/London">Europe/London (GMT/BST)</option>
                 <option value="UTC">UTC</option>
-                <option value="Europe/Dublin">Europe/Dublin</option>
-                <option value="Europe/Paris">Europe/Paris</option>
                 <option value="America/New_York">America/New_York (EST)</option>
               </select>
             </div>
@@ -542,7 +541,7 @@ export default function CreateShiftPage() {
                   type="text"
                   value={formattedAddress}
                   onChange={(e) => setFormattedAddress(e.target.value)}
-                  placeholder="e.g. 10 Berkeley Square, London W1J 6AA"
+                  placeholder="e.g. Road 27, Dhanmondi, Dhaka 1209"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 text-sm"
                 />
               </div>
