@@ -79,9 +79,9 @@ test.describe("WORVO Marketplace E2E Suite", () => {
     await expect(drawer).toBeVisible();
 
     // Verify drawer navigation links
-    await expect(page.getByRole("link", { name: /Hourly Shifts/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Hire Verified Workers/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Local Home & Task Services/i })).toBeVisible();
+    await expect(drawer.getByRole("link", { name: /Hourly Shifts/i })).toBeVisible();
+    await expect(drawer.getByRole("link", { name: /Hire Verified Workers/i })).toBeVisible();
+    await expect(drawer.getByRole("link", { name: /Local Home & Task Services/i })).toBeVisible();
 
     // Close drawer
     await page.getByRole("button", { name: /Close menu/i }).click();
