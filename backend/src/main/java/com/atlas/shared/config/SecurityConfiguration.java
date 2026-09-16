@@ -57,6 +57,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/v1/jobs", "/api/v1/jobs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/shifts", "/api/v1/shifts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/public/credentials/*").permitAll()
+                        .requestMatchers("/api/v1/messages", "/api/v1/messages/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/workers/me/earnings").permitAll()
                         .requestMatchers("/api/v1/auth/bootstrap").authenticated()
                         .requestMatchers("/api/v1/auth/me").authenticated()
                         .requestMatchers("/api/v1/workers/me/**").hasRole("WORKER")

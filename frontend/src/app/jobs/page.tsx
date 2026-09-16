@@ -79,41 +79,51 @@ export default function JobMarketplacePage() {
     fetchJobs(0);
   };
 
-  const formatBudget = (min?: number, max?: number, currency: string = "GBP") => {
-    const symbol = currency === "GBP" ? "£" : currency === "EUR" ? "€" : "$";
+  const formatBudget = (min?: number, max?: number, currency: string = "BDT") => {
+    const symbol = currency === "GBP" ? "£" : currency === "EUR" ? "€" : currency === "USD" ? "$" : "৳";
+    const formatVal = (val: number) => {
+      const num = val / 100;
+      return currency === "GBP" || num % 1 !== 0 ? num.toFixed(2) : num.toFixed(0);
+    };
     if (min && max) {
-      return `${symbol}${(min / 100).toFixed(2)} – ${symbol}${(max / 100).toFixed(2)}`;
+      return `${symbol}${formatVal(min)} – ${symbol}${formatVal(max)}`;
     }
-    if (min) return `From ${symbol}${(min / 100).toFixed(2)}`;
-    if (max) return `Up to ${symbol}${(max / 100).toFixed(2)}`;
+    if (min) return `From ${symbol}${formatVal(min)}`;
+    if (max) return `Up to ${symbol}${formatVal(max)}`;
     return "Rate Negotiable";
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#070b14] text-slate-100">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <header className="bg-[#0b1120]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="font-extrabold text-xl text-slate-900 tracking-tight flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-full bg-orange-600 inline-block" />
-              SkillHub
+            <Link href="/" className="font-extrabold text-xl text-white tracking-tight flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-full bg-blue-500 inline-block shadow-[0_0_10px_#3B82F6]" />
+              WORVO <span className="text-xs font-normal text-slate-400">Jobs</span>
             </Link>
-            <span className="text-xs px-2 py-0.5 bg-orange-50 text-orange-700 font-semibold rounded border border-orange-200">
+            <span className="text-xs px-2.5 py-0.5 bg-blue-950/60 text-blue-400 font-semibold rounded-full border border-blue-800/60">
               Verified Marketplace
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/shifts"
+              className="text-sm font-semibold text-slate-300 hover:text-white transition"
+            >
+              Hourly Shifts
+            </Link>
             <Link
               href="/dashboard/worker"
-              className="text-sm font-semibold text-slate-600 hover:text-slate-900"
+              className="text-sm font-semibold text-slate-300 hover:text-white transition"
             >
               Worker Portal
             </Link>
             <Link
               href="/jobs/create"
-              className="px-3.5 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold hover:bg-orange-700 transition"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-sm font-semibold hover:brightness-110 shadow-lg shadow-blue-600/20 transition"
             >
               Post a Job
             </Link>
@@ -122,31 +132,31 @@ export default function JobMarketplacePage() {
       </header>
 
       {/* Hero Search Section */}
-      <section className="bg-gradient-to-b from-slate-900 to-slate-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <section className="bg-gradient-to-b from-[#0e1626] to-[#070b14] border-b border-slate-800/80 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center space-y-4">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
             Find Verified Workforce Engagements
           </h1>
-          <p className="text-slate-300 text-base max-w-2xl mx-auto">
-            Discover verified shifts, service calls, and contracting opportunities with instant skill matching.
+          <p className="text-slate-400 text-base max-w-2xl mx-auto">
+            Discover verified shifts, service calls, and contracting opportunities in Dhaka, BD with instant skill matching.
           </p>
 
-          <form onSubmit={handleSearchSubmit} className="bg-white p-3 rounded-2xl shadow-xl flex flex-col sm:flex-row gap-2 mt-6">
-            <div className="flex-1 flex items-center px-3 py-2 bg-slate-50 rounded-xl">
-              <span className="text-slate-400 mr-2">🔍</span>
+          <form onSubmit={handleSearchSubmit} className="bg-[#0b1120] border border-slate-800 p-2.5 rounded-2xl shadow-2xl flex flex-col sm:flex-row gap-2 mt-6">
+            <div className="flex-1 flex items-center px-3 py-2 bg-[#070b14] border border-slate-800/80 rounded-xl">
+              <span className="text-slate-500 mr-2">🔍</span>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Job title, trade, or keyword..."
-                className="w-full bg-transparent text-slate-900 placeholder-slate-400 outline-none text-sm"
+                placeholder="Job title, trade, or keyword (e.g. Electrician, Driver)..."
+                className="w-full bg-transparent text-slate-100 placeholder-slate-500 outline-none text-sm"
               />
             </div>
 
             <select
               value={jobType}
               onChange={(e) => setJobType(e.target.value)}
-              className="px-3 py-2 bg-slate-50 text-slate-900 rounded-xl outline-none text-sm font-medium border-0"
+              className="px-3.5 py-2 bg-[#070b14] border border-slate-800/80 text-slate-200 rounded-xl outline-none text-sm font-medium"
             >
               <option value="">All Job Types</option>
               <option value="SHIFT">Hourly Shifts</option>
@@ -156,20 +166,20 @@ export default function JobMarketplacePage() {
 
             <button
               type="submit"
-              className="px-6 py-2.5 bg-orange-600 text-white font-semibold rounded-xl text-sm hover:bg-orange-700 transition flex items-center justify-center gap-1.5"
+              className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl text-sm hover:brightness-110 shadow-lg shadow-blue-500/20 transition flex items-center justify-center gap-1.5"
             >
               Search
             </button>
           </form>
 
           {/* Location Toggle */}
-          <div className="flex items-center justify-center gap-4 text-xs text-slate-300 pt-2">
+          <div className="flex items-center justify-center gap-4 text-xs text-slate-400 pt-2">
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={useLocation}
                 onChange={(e) => setUseLocation(e.target.checked)}
-                className="rounded text-orange-600 focus:ring-orange-500"
+                className="rounded bg-slate-800 border-slate-700 text-blue-500 focus:ring-blue-500"
               />
               <span>Filter by Radius</span>
             </label>
@@ -180,14 +190,14 @@ export default function JobMarketplacePage() {
                 <select
                   value={radiusKm}
                   onChange={(e) => setRadiusKm(Number(e.target.value))}
-                  className="bg-slate-700 text-white rounded px-2 py-0.5 border border-slate-600 outline-none"
+                  className="bg-slate-900 text-slate-200 rounded px-2.5 py-1 border border-slate-800 outline-none text-xs"
                 >
+                  <option value={5}>5 km</option>
                   <option value={10}>10 km</option>
                   <option value={25}>25 km</option>
                   <option value={50}>50 km</option>
-                  <option value={100}>100 km</option>
                 </select>
-                <span>of Greater London</span>
+                <span>of Dhaka City Center</span>
               </div>
             )}
           </div>
@@ -197,7 +207,7 @@ export default function JobMarketplacePage() {
       {/* Main Results Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-600">
+          <p className="text-sm font-semibold text-slate-400">
             {loading ? "Searching..." : `${total} open engagement${total === 1 ? "" : "s"} found`}
           </p>
         </div>
@@ -210,13 +220,13 @@ export default function JobMarketplacePage() {
 
         {loading ? (
           <div className="py-20 flex justify-center">
-            <div className="w-10 h-10 border-4 border-orange-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : jobs.length === 0 ? (
-          <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-3">
+          <div className="bg-[#0e1626] p-12 rounded-2xl border border-slate-800 text-center space-y-3">
             <div className="text-4xl">🔍</div>
-            <h2 className="text-lg font-bold text-slate-900">No jobs match your search</h2>
-            <p className="text-sm text-slate-500 max-w-md mx-auto">
+            <h2 className="text-lg font-bold text-white">No jobs match your search</h2>
+            <p className="text-sm text-slate-400 max-w-md mx-auto">
               Try adjusting your keywords, expanding your search radius, or clearing job type filters.
             </p>
             <button
@@ -225,7 +235,7 @@ export default function JobMarketplacePage() {
                 setJobType("");
                 setUseLocation(false);
               }}
-              className="text-sm font-semibold text-orange-600 hover:text-orange-700 underline"
+              className="text-sm font-semibold text-blue-400 hover:text-blue-300 underline"
             >
               Reset Filters
             </button>
@@ -236,28 +246,28 @@ export default function JobMarketplacePage() {
               <Link
                 key={job.id}
                 href={`/jobs/${job.id}`}
-                className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-orange-500 hover:shadow-md transition flex flex-col justify-between space-y-4 group"
+                className="bg-[#0e1626] p-6 rounded-2xl border border-slate-800/90 hover:border-blue-500/80 hover:shadow-xl hover:shadow-blue-500/10 transition flex flex-col justify-between space-y-4 group"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs px-2.5 py-1 font-semibold rounded-full bg-slate-100 text-slate-700">
+                    <span className="text-xs px-2.5 py-1 font-semibold rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                       {job.jobType}
                     </span>
                     {job.distanceMeters !== undefined && job.distanceMeters !== null && (
-                      <span className="text-xs text-orange-600 font-semibold">
+                      <span className="text-xs text-blue-400 font-semibold">
                         📍 {(job.distanceMeters / 1000).toFixed(1)} km away
                       </span>
                     )}
                   </div>
 
-                  <h3 className="font-bold text-slate-900 group-hover:text-orange-600 transition line-clamp-2">
+                  <h3 className="font-bold text-white group-hover:text-blue-400 transition line-clamp-2">
                     {job.title}
                   </h3>
 
-                  <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                    <span className="font-medium text-slate-800">{job.organizationName}</span>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <span className="font-medium text-slate-300">{job.organizationName}</span>
                     {job.organizationVerificationStatus === "VERIFIED" && (
-                      <span className="text-blue-600 font-bold" title="Verified Business">✓</span>
+                      <span className="text-blue-400 font-bold" title="Verified Business">✓</span>
                     )}
                   </div>
 
@@ -268,17 +278,17 @@ export default function JobMarketplacePage() {
                   )}
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
                   <div>
-                    <span className="block text-slate-400 font-medium">Compensation</span>
-                    <span className="font-bold text-slate-900 text-sm">
+                    <span className="block text-slate-500 font-medium">Compensation</span>
+                    <span className="font-bold text-blue-400 text-sm">
                       {formatBudget(job.budgetMinPence, job.budgetMaxPence, job.currency)}
                     </span>
                   </div>
 
                   <div className="text-right">
-                    <span className="block text-slate-400 font-medium">Requirements</span>
-                    <span className="font-semibold text-slate-700">
+                    <span className="block text-slate-500 font-medium">Requirements</span>
+                    <span className="font-semibold text-slate-300">
                       {job.requiredSkillsCount} skill{job.requiredSkillsCount === 1 ? "" : "s"}
                       {job.requiredCredentialsCount > 0 && ` • ${job.requiredCredentialsCount} cert`}
                     </span>
@@ -295,17 +305,17 @@ export default function JobMarketplacePage() {
             <button
               disabled={page === 0 || loading}
               onClick={() => fetchJobs(page - 1)}
-              className="px-4 py-2 border rounded-lg text-sm font-semibold bg-white disabled:opacity-50"
+              className="px-4 py-2 border border-slate-800 rounded-lg text-sm font-semibold bg-[#0e1626] text-slate-200 disabled:opacity-40"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm font-semibold text-slate-600">
+            <span className="px-4 py-2 text-sm font-semibold text-slate-400">
               Page {page + 1} of {Math.ceil(total / 12)}
             </span>
             <button
               disabled={(page + 1) * 12 >= total || loading}
               onClick={() => fetchJobs(page + 1)}
-              className="px-4 py-2 border rounded-lg text-sm font-semibold bg-white disabled:opacity-50"
+              className="px-4 py-2 border border-slate-800 rounded-lg text-sm font-semibold bg-[#0e1626] text-slate-200 disabled:opacity-40"
             >
               Next
             </button>

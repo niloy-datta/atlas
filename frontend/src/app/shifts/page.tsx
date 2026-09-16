@@ -115,48 +115,49 @@ export default function ShiftMarketplacePage() {
     }
   };
 
-  const formatRate = (ratePence: number, currency: string = "GBP") => {
-    const symbol = currency === "GBP" ? "£" : currency === "EUR" ? "€" : "$";
-    return `${symbol}${(ratePence / 100).toFixed(2)}`;
+  const formatRate = (ratePence: number, currency: string = "BDT") => {
+    const symbol = currency === "GBP" ? "£" : currency === "EUR" ? "€" : currency === "USD" ? "$" : "৳";
+    const num = ratePence / 100;
+    return `${symbol}${currency === "GBP" || num % 1 !== 0 ? num.toFixed(2) : num.toFixed(0)}`;
   };
 
-  const formatTotalPayout = (ratePence: number, durationHours: number, currency: string = "GBP") => {
-    const symbol = currency === "GBP" ? "£" : currency === "EUR" ? "€" : "$";
+  const formatTotalPayout = (ratePence: number, durationHours: number, currency: string = "BDT") => {
+    const symbol = currency === "GBP" ? "£" : currency === "EUR" ? "€" : currency === "USD" ? "$" : "৳";
     const total = (ratePence / 100) * durationHours;
-    return `${symbol}${total.toFixed(2)}`;
+    return `${symbol}${currency === "GBP" || total % 1 !== 0 ? total.toFixed(2) : total.toFixed(0)}`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#070b14] text-slate-100">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <header className="bg-[#0b1120]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="font-extrabold text-xl text-slate-900 tracking-tight flex items-center gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-full bg-emerald-600 inline-block" />
-              SkillHub
+            <Link href="/" className="font-extrabold text-xl text-white tracking-tight flex items-center gap-1.5">
+              <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 inline-block shadow-[0_0_10px_#10B981]" />
+              WORVO <span className="text-xs font-normal text-slate-400">Shifts</span>
             </Link>
-            <span className="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-700 font-semibold rounded border border-emerald-200">
-              Shift Roster & Marketplace
+            <span className="text-xs px-2.5 py-0.5 bg-emerald-950/60 text-emerald-400 font-semibold rounded-full border border-emerald-800/60">
+              Verified Marketplace
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Link
               href="/jobs"
-              className="text-sm font-semibold text-slate-600 hover:text-slate-900"
+              className="text-sm font-semibold text-slate-300 hover:text-white transition"
             >
               Jobs Marketplace
             </Link>
             <Link
               href="/dashboard/worker"
-              className="text-sm font-semibold text-slate-600 hover:text-slate-900"
+              className="text-sm font-semibold text-slate-300 hover:text-white transition"
             >
               Worker Portal
             </Link>
             <Link
               href="/shifts/create"
-              className="px-3.5 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition"
+              className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg text-sm font-semibold hover:brightness-110 shadow-lg shadow-emerald-600/20 transition"
             >
               Post a Shift
             </Link>
@@ -165,56 +166,56 @@ export default function ShiftMarketplacePage() {
       </header>
 
       {/* Hero Search Section */}
-      <section className="bg-gradient-to-b from-slate-950 to-slate-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <section className="bg-gradient-to-b from-[#0e1626] to-[#070b14] border-b border-slate-800/80 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center space-y-4">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
             Discover Verified Hourly Shifts
           </h1>
-          <p className="text-slate-300 text-base max-w-2xl mx-auto">
-            Find guaranteed shifts with clear pay, instant skill verification, and fast capacity booking.
+          <p className="text-slate-400 text-base max-w-2xl mx-auto">
+            Find guaranteed shifts in Dhaka, BD with clear pay, instant skill verification, and fast capacity booking.
           </p>
 
-          <form onSubmit={handleSearchSubmit} className="bg-white p-3 rounded-2xl shadow-xl flex flex-col sm:flex-row gap-2 mt-6">
-            <div className="flex-1 flex items-center px-3 py-2 bg-slate-50 rounded-xl">
-              <span className="text-slate-400 mr-2">🔍</span>
+          <form onSubmit={handleSearchSubmit} className="bg-[#0b1120] border border-slate-800 p-2.5 rounded-2xl shadow-2xl flex flex-col sm:flex-row gap-2 mt-6">
+            <div className="flex-1 flex items-center px-3 py-2 bg-[#070b14] border border-slate-800/80 rounded-xl">
+              <span className="text-slate-500 mr-2">🔍</span>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Shift title, trade, or role..."
-                className="w-full bg-transparent text-slate-900 placeholder-slate-400 outline-none text-sm"
+                placeholder="Shift title, trade, or role (e.g. Waiter, Warehouse)..."
+                className="w-full bg-transparent text-slate-100 placeholder-slate-500 outline-none text-sm"
               />
             </div>
 
-            <div className="flex items-center px-3 py-2 bg-slate-50 rounded-xl">
-              <span className="text-slate-500 text-xs font-semibold mr-1.5">Min £/hr:</span>
+            <div className="flex items-center px-3 py-2 bg-[#070b14] border border-slate-800/80 rounded-xl">
+              <span className="text-slate-400 text-xs font-semibold mr-1.5">Min ৳/hr:</span>
               <input
                 type="number"
                 min="0"
-                step="0.50"
+                step="50"
                 value={minRatePounds}
                 onChange={(e) => setMinRatePounds(e.target.value)}
-                placeholder="15.00"
-                className="w-20 bg-transparent text-slate-900 placeholder-slate-400 outline-none text-sm font-medium"
+                placeholder="350"
+                className="w-20 bg-transparent text-slate-100 placeholder-slate-500 outline-none text-sm font-medium"
               />
             </div>
 
             <button
               type="submit"
-              className="px-6 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl text-sm hover:bg-emerald-700 transition flex items-center justify-center gap-1.5"
+              className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl text-sm hover:brightness-110 shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-1.5"
             >
               Search
             </button>
           </form>
 
           {/* Location Toggle */}
-          <div className="flex items-center justify-center gap-4 text-xs text-slate-300 pt-2">
+          <div className="flex items-center justify-center gap-4 text-xs text-slate-400 pt-2">
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={useLocation}
                 onChange={(e) => setUseLocation(e.target.checked)}
-                className="rounded text-emerald-600 focus:ring-emerald-500"
+                className="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-emerald-500"
               />
               <span>Filter by Radius</span>
             </label>
@@ -225,14 +226,14 @@ export default function ShiftMarketplacePage() {
                 <select
                   value={radiusKm}
                   onChange={(e) => setRadiusKm(Number(e.target.value))}
-                  className="bg-slate-800 text-white rounded px-2 py-0.5 border border-slate-700 outline-none"
+                  className="bg-slate-900 text-slate-200 rounded px-2.5 py-1 border border-slate-800 outline-none text-xs"
                 >
+                  <option value={5}>5 km</option>
                   <option value={10}>10 km</option>
                   <option value={25}>25 km</option>
                   <option value={50}>50 km</option>
-                  <option value={100}>100 km</option>
                 </select>
-                <span>of Greater London</span>
+                <span>of Dhaka City Center</span>
               </div>
             )}
           </div>
@@ -242,7 +243,7 @@ export default function ShiftMarketplacePage() {
       {/* Main Results Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-600">
+          <p className="text-sm font-semibold text-slate-400">
             {loading ? "Searching shifts..." : `${total} active shift${total === 1 ? "" : "s"} available`}
           </p>
         </div>
@@ -287,34 +288,34 @@ export default function ShiftMarketplacePage() {
                 >
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs px-2.5 py-1 font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="text-xs px-2.5 py-1 font-bold rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
                         {shift.capacity} slot{shift.capacity === 1 ? "" : "s"}
                       </span>
                       {shift.distanceMeters !== undefined && shift.distanceMeters !== null && (
-                        <span className="text-xs text-emerald-600 font-semibold">
+                        <span className="text-xs text-emerald-400 font-semibold">
                           📍 {(shift.distanceMeters / 1000).toFixed(1)} km away
                         </span>
                       )}
                     </div>
 
-                    <h3 className="font-bold text-slate-900 group-hover:text-emerald-600 transition line-clamp-2">
+                    <h3 className="font-bold text-white group-hover:text-emerald-400 transition line-clamp-2">
                       {shift.title}
                     </h3>
 
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                      <span className="font-medium text-slate-800">{shift.organizationName}</span>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <span className="font-medium text-slate-300">{shift.organizationName}</span>
                       {shift.organizationVerificationStatus === "VERIFIED" && (
-                        <span className="text-blue-600 font-bold" title="Verified Business">✓</span>
+                        <span className="text-blue-400 font-bold" title="Verified Business">✓</span>
                       )}
                     </div>
 
                     {/* Shift Time Interval Box */}
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
-                      <div className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                    <div className="bg-[#070b14] p-3 rounded-xl border border-slate-800/90 space-y-1">
+                      <div className="text-xs font-bold text-slate-200 flex items-center justify-between">
                         <span>🗓️ {interval.dateStr}</span>
-                        <span className="text-slate-500 font-normal">{interval.durationStr}</span>
+                        <span className="text-slate-400 font-normal">{interval.durationStr}</span>
                       </div>
-                      <div className="text-xs text-slate-600 font-medium">
+                      <div className="text-xs text-slate-400 font-medium">
                         ⏰ {interval.timeStr} ({shift.timezone})
                       </div>
                     </div>
@@ -326,20 +327,20 @@ export default function ShiftMarketplacePage() {
                     )}
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
                     <div>
-                      <span className="block text-slate-400 font-medium">Hourly Rate</span>
-                      <span className="font-extrabold text-slate-900 text-sm">
+                      <span className="block text-slate-500 font-medium">Hourly Rate</span>
+                      <span className="font-extrabold text-emerald-400 text-sm">
                         {formatRate(shift.hourlyRatePence, shift.currency)}/hr
                       </span>
-                      <span className="block text-[11px] text-emerald-700 font-semibold">
+                      <span className="block text-[11px] text-teal-300 font-semibold">
                         ~{formatTotalPayout(shift.hourlyRatePence, interval.durationHours, shift.currency)} est. pay
                       </span>
                     </div>
 
                     <div className="text-right">
-                      <span className="block text-slate-400 font-medium">Requirements</span>
-                      <span className="font-semibold text-slate-700">
+                      <span className="block text-slate-500 font-medium">Requirements</span>
+                      <span className="font-semibold text-slate-300">
                         {shift.requiredSkillsCount} skill{shift.requiredSkillsCount === 1 ? "" : "s"}
                         {shift.requiredCredentialsCount > 0 && ` • ${shift.requiredCredentialsCount} cert`}
                       </span>
@@ -357,17 +358,17 @@ export default function ShiftMarketplacePage() {
             <button
               disabled={page === 0 || loading}
               onClick={() => fetchShifts(page - 1)}
-              className="px-4 py-2 border rounded-lg text-sm font-semibold bg-white disabled:opacity-50"
+              className="px-4 py-2 border border-slate-800 rounded-lg text-sm font-semibold bg-[#0e1626] text-slate-200 disabled:opacity-40"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm font-semibold text-slate-600">
+            <span className="px-4 py-2 text-sm font-semibold text-slate-400">
               Page {page + 1} of {Math.ceil(total / 12)}
             </span>
             <button
               disabled={(page + 1) * 12 >= total || loading}
               onClick={() => fetchShifts(page + 1)}
-              className="px-4 py-2 border rounded-lg text-sm font-semibold bg-white disabled:opacity-50"
+              className="px-4 py-2 border border-slate-800 rounded-lg text-sm font-semibold bg-[#0e1626] text-slate-200 disabled:opacity-40"
             >
               Next
             </button>

@@ -95,50 +95,50 @@ export default function WorkerDashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center p-8 bg-white rounded-xl shadow-sm border border-slate-100">
-          <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600 font-medium">Loading worker dashboard...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#070b14]">
+        <div className="text-center p-8 bg-[#0e1626] rounded-xl shadow-sm border border-slate-800">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-300 font-medium">Loading worker dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#070b14] text-slate-100">
       {/* Top Navbar */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <header className="bg-[#0b1120]/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
               <svg className="w-7 h-7" viewBox="0 0 32 32" fill="none">
-                <circle cx="10" cy="16" r="6" fill="#FF5A1F" />
-                <circle cx="22" cy="10" r="4" fill="#0F172A" />
-                <circle cx="22" cy="22" r="4" fill="#0F172A" />
-                <line x1="14.5" y1="13.5" x2="18.5" y2="11.5" stroke="#0F172A" strokeWidth="2" />
-                <line x1="14.5" y1="18.5" x2="18.5" y2="20.5" stroke="#0F172A" strokeWidth="2" />
+                <circle cx="10" cy="16" r="6" fill="#3B82F6" />
+                <circle cx="22" cy="10" r="4" fill="#8B5CF6" />
+                <circle cx="22" cy="22" r="4" fill="#10B981" />
+                <line x1="14.5" y1="13.5" x2="18.5" y2="11.5" stroke="#60A5FA" strokeWidth="2" />
+                <line x1="14.5" y1="18.5" x2="18.5" y2="20.5" stroke="#34D399" strokeWidth="2" />
               </svg>
-              <span className="font-bold text-lg text-slate-900">SkillHub</span>
+              <span className="font-bold text-lg text-white">WORVO <span className="text-xs font-normal text-slate-400">Worker</span></span>
             </Link>
-            <nav className="flex items-center gap-4 text-sm font-medium text-slate-600">
-              <Link href="/dashboard/worker" className="text-orange-600 font-semibold">Dashboard</Link>
-              <Link href="/shifts" className="hover:text-slate-900 font-medium">Browse Shifts ⏱️</Link>
-              <Link href="/jobs" className="hover:text-slate-900">Browse Jobs</Link>
-              <Link href="/profile" className="hover:text-slate-900">Profile</Link>
-              <Link href="/skills" className="hover:text-slate-900">Skills</Link>
-              <Link href="/credentials" className="hover:text-slate-900">Credentials</Link>
+            <nav className="flex items-center gap-4 text-sm font-medium text-slate-400">
+              <Link href="/dashboard/worker" className="text-blue-400 font-semibold">Dashboard</Link>
+              <Link href="/shifts" className="hover:text-white font-medium">Browse Shifts ⏱️</Link>
+              <Link href="/jobs" className="hover:text-white">Browse Jobs 💼</Link>
+              <Link href="/profile" className="hover:text-white">Profile</Link>
+              <Link href="/skills" className="hover:text-white">Skills</Link>
+              <Link href="/credentials" className="hover:text-white">Credentials</Link>
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs px-2.5 py-1 bg-orange-100 text-orange-700 font-semibold rounded-full">
-              WORKER
+            <span className="text-xs px-2.5 py-0.5 bg-blue-950/60 text-blue-400 border border-blue-800/60 font-semibold rounded-full">
+              VERIFIED WORKER
             </span>
-            <span className="text-sm text-slate-700 font-medium">{atlasUser?.email || firebaseUser?.email}</span>
+            <span className="text-sm text-slate-300 font-medium">{atlasUser?.email || firebaseUser?.email}</span>
             <button
               onClick={() => signOut()}
-              className="text-sm text-slate-500 hover:text-slate-900 font-medium ml-2"
+              className="text-sm text-slate-400 hover:text-white font-medium ml-2"
             >
-              Sign out
+              Log out
             </button>
           </div>
         </div>
@@ -146,37 +146,43 @@ export default function WorkerDashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {actionError && (
+          <div className="mb-6 p-4 rounded-lg bg-red-950/60 border border-red-800 text-red-300 text-sm flex items-center justify-between">
+            <span>{actionError}</span>
+            <button onClick={() => setActionError(null)} className="text-red-400 font-bold">✕</button>
+          </div>
+        )}
         {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center justify-between">
+          <div className="mb-6 p-4 rounded-lg bg-red-950/60 border border-red-800 text-red-300 text-sm flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-500 font-bold">✕</button>
+            <button onClick={() => setError(null)} className="text-red-400 font-bold">✕</button>
           </div>
         )}
 
         {/* Hero Banner */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="bg-[#0e1626] rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-slate-900 to-slate-700 border-2 border-emerald-500/80 flex items-center justify-center text-white font-bold text-2xl shadow-md relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-700 border-2 border-emerald-500/80 flex items-center justify-center text-white font-bold text-2xl shadow-md relative">
               {profile?.fullName ? profile.fullName.substring(0, 2).toUpperCase() : "WP"}
-              <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center text-white text-[10px] font-bold">
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-[#0e1626] flex items-center justify-center text-white text-[10px] font-bold">
                 ✓
               </span>
             </div>
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl font-bold text-slate-900">{profile?.fullName || profile?.handle || "Worker"}</h1>
-                <span className="text-xs px-2.5 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded-full border border-emerald-300 flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
-                  ATLAS Verified (Level 3)
+                <h1 className="text-2xl font-bold text-white">{profile?.fullName || "Niloy Chandra Datta"}</h1>
+                <span className="text-xs px-2.5 py-0.5 bg-emerald-950/80 text-emerald-400 font-bold rounded-full border border-emerald-800/80 flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                  WORVO Verified (Level 3)
                 </span>
               </div>
-              <p className="text-slate-600 text-sm font-medium">{profile?.headline || "Certified Physical Workforce Professional"}</p>
-              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-2">
-                <span>📍 {profile?.location?.city || "London"}, {profile?.location?.countryCode || "GB"}</span>
+              <p className="text-slate-300 text-sm font-medium">{profile?.headline || "Warehouse Worker & Shift Specialist"}</p>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-2">
+                <span>📍 {profile?.location?.city || "Dhaka"}, {profile?.location?.countryCode || "BD"}</span>
                 <span>•</span>
-                <span className="font-mono">@{profile?.handle}</span>
+                <span className="font-mono text-blue-400">@{profile?.handle || "niloy"}</span>
                 <span>•</span>
-                <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <span className="text-emerald-400 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/50">
                   🛡️ Police Clearance: PASSED
                 </span>
               </div>
@@ -186,13 +192,13 @@ export default function WorkerDashboardPage() {
           <div className="w-full md:w-auto flex flex-col sm:flex-row gap-3">
             <Link
               href="/shifts"
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold text-center shadow-sm"
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:brightness-110 text-white rounded-lg text-sm font-semibold text-center shadow-lg shadow-emerald-500/20"
             >
               Browse Shifts ⏱️
             </Link>
             <Link
               href="/jobs"
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-semibold text-center shadow-sm"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white rounded-lg text-sm font-semibold text-center shadow-lg shadow-blue-600/20"
             >
               Browse Jobs 💼
             </Link>
@@ -200,7 +206,7 @@ export default function WorkerDashboardPage() {
               <Link
                 href={`/workpass/${profile.handle}`}
                 target="_blank"
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 text-sm font-medium text-center"
+                className="px-4 py-2 border border-slate-700 bg-slate-800/80 rounded-lg text-slate-200 hover:bg-slate-700 text-sm font-medium text-center"
               >
                 Public WorkPass ↗
               </Link>
@@ -210,47 +216,49 @@ export default function WorkerDashboardPage() {
 
         {/* Worker Trust, Ratings, and Experience Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {/* Client Rating */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1">
-              <span>CLIENT SATISFACTION</span>
-              <span className="text-emerald-600 font-bold font-mono">100% Verified</span>
+          {/* Today's Earnings */}
+          <div className="bg-[#0e1626] p-5 rounded-2xl border border-slate-800 shadow-md">
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1">
+              <span>TODAY&apos;S EARNINGS</span>
+              <span className="text-emerald-400 font-bold font-mono">+12% vs avg</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 font-mono">4.98</span>
-              <span className="text-amber-500 text-base">★★★★★</span>
+              <span className="text-3xl font-extrabold text-emerald-400 font-mono">৳2,400</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">Based on 132 shift client ratings</p>
+            <p className="text-xs text-slate-400 mt-1">2 shifts completed • ৳1,600</p>
           </div>
 
-          {/* Platform Experience / Tenure */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1">
+          {/* Client Rating */}
+          <div className="bg-[#0e1626] p-5 rounded-2xl border border-slate-800 shadow-md">
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1">
+              <span>CLIENT SATISFACTION</span>
+              <span className="text-emerald-400 font-bold font-mono">100% Verified</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-white font-mono">4.92</span>
+              <span className="text-amber-400 text-base">★★★★★</span>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">Based on 128 verified ratings</p>
+          </div>
+
+          {/* Experience on Platform */}
+          <div className="bg-[#0e1626] p-5 rounded-2xl border border-slate-800 shadow-md">
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1">
               <span>EXPERIENCE ON PLATFORM</span>
-              <span className="text-blue-600 font-bold font-mono">ACTIVE</span>
+              <span className="text-blue-400 font-bold font-mono">ACTIVE</span>
             </div>
-            <div className="text-3xl font-extrabold text-slate-900 font-mono">2+ Yrs</div>
-            <p className="text-xs text-slate-500 mt-1">1,240 shift hours logged without dispute</p>
-          </div>
-
-          {/* On-Time Arrival & Compliance */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1">
-              <span>ON-TIME ARRIVAL RECORD</span>
-              <span className="text-emerald-600 font-bold font-mono">EXEMPLARY</span>
-            </div>
-            <div className="text-3xl font-extrabold text-emerald-600 font-mono">99.4%</div>
-            <p className="text-xs text-slate-500 mt-1">GPS-verified geo-fence check-ins</p>
+            <div className="text-3xl font-extrabold text-white font-mono">720 hrs</div>
+            <p className="text-xs text-slate-400 mt-1">98% attendance • 96% reliability</p>
           </div>
 
           {/* Strict Verification Audit Status */}
-          <div className="bg-emerald-50/70 p-5 rounded-2xl border border-emerald-200 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-emerald-800 mb-1">
-              <span>BACKGROUND & POLICE CHECK</span>
-              <span className="text-xs">🛡️ AUDITED</span>
+          <div className="bg-[#0e1626] p-5 rounded-2xl border border-slate-800 shadow-md">
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1">
+              <span>BACKGROUND CHECK</span>
+              <span className="text-emerald-400 font-bold font-mono">PASSED</span>
             </div>
-            <div className="text-xl font-extrabold text-emerald-900 font-mono mt-1">VERIFIED CLEAR</div>
-            <p className="text-xs text-emerald-700 mt-1">Identity & Right to Work confirmed by ATLAS</p>
+            <div className="text-xl font-extrabold text-emerald-400 font-mono mt-1">VERIFIED CLEAR</div>
+            <p className="text-xs text-slate-400 mt-1">NID & Right to Work confirmed by WORVO</p>
           </div>
         </div>
 

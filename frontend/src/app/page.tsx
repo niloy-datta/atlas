@@ -2,26 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
   const { firebaseUser, atlasUser, signOut } = useAuth();
   const [composerInput, setComposerInput] = useState("");
-  const [activeMode, setActiveMode] = useState<"text" | "speak" | "photo">("text");
   const [interactiveNotice, setInteractiveNotice] = useState<string | null>(null);
 
   const showNotice = (msg: string) => {
     setInteractiveNotice(msg);
     setTimeout(() => setInteractiveNotice(null), 4000);
-  };
-
-  const handleModeClick = (mode: "speak" | "photo") => {
-    setActiveMode(mode);
-    if (mode === "speak") {
-      setComposerInput("Voice preview: Leaking pipe under kitchen sink");
-    } else if (mode === "photo") {
-      setComposerInput("Photo attached: [broken_circuit_breaker.png]");
-    }
   };
 
   const handleHeroSubmit = () => {
@@ -50,26 +41,28 @@ export default function Home() {
       <div className="nav-left">
         <Link href="/" className="brand-logo">
           <svg className="logo-icon" viewBox="0 0 32 32" fill="none">
-            <circle cx="10" cy="16" r="6" fill="#FF5A1F"/>
-            <circle cx="22" cy="10" r="4" fill="#0F172A"/>
-            <circle cx="22" cy="22" r="4" fill="#0F172A"/>
-            <line x1="14.5" y1="13.5" x2="18.5" y2="11.5" stroke="#0F172A" strokeWidth="2"/>
-            <line x1="14.5" y1="18.5" x2="18.5" y2="20.5" stroke="#0F172A" strokeWidth="2"/>
+            <circle cx="10" cy="16" r="6" fill="#3B82F6"/>
+            <circle cx="22" cy="10" r="4" fill="#8B5CF6"/>
+            <circle cx="22" cy="22" r="4" fill="#10B981"/>
+            <line x1="14.5" y1="13.5" x2="18.5" y2="11.5" stroke="#60A5FA" strokeWidth="2"/>
+            <line x1="14.5" y1="18.5" x2="18.5" y2="20.5" stroke="#34D399" strokeWidth="2"/>
           </svg>
-          <span className="logo-text">SkillHub</span>
+          <span className="logo-text font-bold tracking-tight">WORVO <span className="text-xs font-normal text-slate-400">by SkillHub</span></span>
         </Link>
         <nav className="nav-links">
-          <a href="#services" className="nav-link">Services</a>
-          <a href="#shifts" className="nav-link">Shifts</a>
-          <a href="#business" className="nav-link">Business</a>
-          <a href="#how-it-works" className="nav-link">How it Works</a>
+          <Link href="/jobs" className="nav-link">Find Work</Link>
+          <Link href="/shifts" className="nav-link">Shifts</Link>
+          <Link href="/hire" className="nav-link">Hire People</Link>
+          <Link href="/workers" className="nav-link">Workers</Link>
+          <Link href="/my-shifts" className="nav-link">My Shifts</Link>
+          <Link href="/workpass" className="nav-link">WorkPass</Link>
         </nav>
       </div>
 
       <div className="nav-right">
         <div className="location-picker">
           <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span>London, UK</span>
+          <span>Dhaka, BD</span>
           <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div className="lang-picker">
@@ -81,11 +74,11 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Link
               href={atlasUser?.roles?.some((r) => r.includes("EMPLOYER")) ? "/dashboard/employer" : "/dashboard/worker"}
-              className="px-3 py-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 rounded-lg text-sm font-semibold transition-colors"
+              className="px-3.5 py-1.5 bg-blue-900/50 border border-blue-500/40 text-blue-300 hover:bg-blue-800/60 rounded-full text-sm font-semibold transition-colors"
             >
               Go to Dashboard →
             </Link>
-            <div className="user-badge" data-testid="user-profile-badge">
+            <div className="user-badge !bg-slate-800 !text-slate-200" data-testid="user-profile-badge">
               <span>{atlasUser?.email || firebaseUser.email}</span>
               {atlasUser?.roles?.[0] && (
                 <span className="role-tag">{atlasUser.roles[0].replace("ROLE_", "")}</span>
@@ -93,7 +86,7 @@ export default function Home() {
             </div>
             <button
               onClick={() => signOut()}
-              className="btn-text"
+              className="btn-text !text-slate-400 hover:!text-white"
               data-testid="logout-button"
             >
               Log out
@@ -113,75 +106,105 @@ export default function Home() {
   <section className="hero-section">
     <div className="hero-container">
       <div className="hero-content">
-        <h1 className="hero-title">Anything breaks.<br />We get it handled.</h1>
+        <h1 className="hero-title">
+          Work when <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">you want.</span><br />
+          Hire when <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">you need.</span>
+        </h1>
         <p className="hero-subtitle">
-          One platform for physical work—home services and flexible shifts—built on verified trust and protected payments.
+          Jobs, shifts and local tasks — real work, real people, real opportunities. Powered by verified identity and secured payouts.
         </p>
 
-        {/* AI Problem Composer */}
+        {/* Search / Filter Bar from Design */}
         <div className="composer-card">
-          <div className="composer-header">
-            <span className="sparkle-icon">✨</span>
-            <span className="composer-title">AI problem composer</span>
+          <div className="flex items-center gap-2 mb-3 border-b border-slate-800 pb-2.5">
+            <button className="px-3.5 py-1.5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+              <span>💼</span> Jobs
+            </button>
+            <Link href="/shifts" className="px-3.5 py-1.5 rounded-full bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition">
+              <span>⏱️</span> Shifts
+            </Link>
+            <Link href="/shifts" className="px-3.5 py-1.5 rounded-full bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition">
+              <span>⚡</span> Tasks
+            </Link>
           </div>
-          <div className="composer-input-row">
-            <input type="text" id="composerInput" placeholder="What do you need help with?" className="composer-input" value={composerInput} onChange={(e) => setComposerInput(e.target.value)} />
-          </div>
-          <div className="composer-actions">
-            <div className="mode-buttons">
-              <button className={`mode-btn ${activeMode === "speak" ? "active" : ""}`} onClick={() => handleModeClick("speak")}>
-                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                <span>Speak</span>
-              </button>
-              <button className={`mode-btn ${activeMode === "photo" ? "active" : ""}`} onClick={() => handleModeClick("photo")}>
-                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                <span>Photo</span>
-              </button>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex-1 flex items-center bg-[#070b14] border border-slate-800 rounded-lg px-3 py-2">
+              <span className="text-slate-400 mr-2">🔍</span>
+              <input
+                type="text"
+                placeholder="What work are you looking for? (e.g. Waiter, Driver)"
+                className="bg-transparent text-sm text-slate-200 outline-none w-full placeholder:text-slate-500"
+                value={composerInput}
+                onChange={(e) => setComposerInput(e.target.value)}
+              />
             </div>
-            <button className="btn-find-help" id="heroSubmitBtn" onClick={handleHeroSubmit}>Find help</button>
+            <div className="flex items-center bg-[#070b14] border border-slate-800 rounded-lg px-3 py-2 sm:w-44">
+              <span className="text-slate-400 mr-2">📍</span>
+              <span className="text-sm text-slate-300">Dhaka, BD</span>
+            </div>
+            <button
+              onClick={handleHeroSubmit}
+              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm rounded-lg shadow-lg shadow-blue-500/20 transition"
+            >
+              Search
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 mt-3 pt-2 text-xs text-slate-400">
+            <span className="font-semibold text-slate-500">Popular:</span>
+            {["Waiter", "Cleaner", "Warehouse", "Driver", "Retail", "Delivery"].map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setComposerInput(tag)}
+                className="px-2.5 py-0.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition"
+              >
+                {tag}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* 3 Pathway Cards */}
         <div className="pathway-grid">
-          <div className="pathway-card orange">
+          <Link href="/shifts" className="pathway-card blue">
             <div className="pathway-icon">
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="#FF5A1F" strokeWidth="2" fill="none"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <span className="text-xl">👤</span>
             </div>
             <div className="pathway-text">
-              <h4>Get a service</h4>
-              <p>Book trusted pros for any home or business job</p>
-            </div>
-            <span className="pathway-arrow">&rsaquo;</span>
-          </div>
-
-          <Link href="/register?role=employer" className="pathway-card blue">
-            <div className="pathway-icon">
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="#2563EB" strokeWidth="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </div>
-            <div className="pathway-text">
-              <h4>Hire workers</h4>
-              <p>Fill shifts fast with verified local workers</p>
+              <h4>I Need Work</h4>
+              <p>Find jobs, shifts and local tasks</p>
             </div>
             <span className="pathway-arrow">&rsaquo;</span>
           </Link>
 
-          <Link href="/register?role=worker" className="pathway-card green">
+          <Link href="/hire" className="pathway-card orange">
             <div className="pathway-icon">
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="#059669" strokeWidth="2" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <span className="text-xl">👥</span>
             </div>
             <div className="pathway-text">
-              <h4>Find work</h4>
-              <p>Discover shifts and build your career</p>
+              <h4>I Need People</h4>
+              <p>Hire trusted workers fast</p>
+            </div>
+            <span className="pathway-arrow">&rsaquo;</span>
+          </Link>
+
+          <Link href="/jobs" className="pathway-card green">
+            <div className="pathway-icon">
+              <span className="text-xl">🏠</span>
+            </div>
+            <div className="pathway-text">
+              <h4>I Need Help</h4>
+              <p>Get help with everyday tasks</p>
             </div>
             <span className="pathway-arrow">&rsaquo;</span>
           </Link>
         </div>
 
         {interactiveNotice && (
-          <div className="mb-6 p-4 rounded-lg bg-orange-50 border border-orange-200 text-orange-800 text-sm flex items-center justify-between" role="status">
+          <div className="mb-6 p-4 rounded-lg bg-blue-950/60 border border-blue-800 text-blue-200 text-sm flex items-center justify-between" role="status">
             <span>{interactiveNotice}</span>
-            <button onClick={() => setInteractiveNotice(null)} className="text-orange-600 font-bold ml-4">✕</button>
+            <button onClick={() => setInteractiveNotice(null)} className="text-blue-400 font-bold ml-4">✕</button>
           </div>
         )}
 
@@ -189,15 +212,15 @@ export default function Home() {
         <div className="hero-indicators">
           <div className="indicator-item">
             <span className="dot-green"></span>
-            <span>Workforce discovery • <strong>London pilot area</strong></span>
+            <span>Workforce discovery • <strong>Dhaka, BD pilot area</strong></span>
           </div>
           <div className="indicator-item">
             <span className="dot-green"></span>
-            <span>SkillProof verification • <strong>Verified identities</strong></span>
+            <span>WorkPass verification • <strong>Verified identities</strong></span>
           </div>
           <div className="indicator-item">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span>Flexible scheduling • <strong>Shifts across active zones</strong></span>
+            <svg viewBox="0 0 24 24" width="15" height="15" stroke="#34D399" strokeWidth="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Flexible scheduling • <strong>Shifts starting from ৳350/hr</strong></span>
           </div>
         </div>
       </div>
@@ -205,32 +228,32 @@ export default function Home() {
       {/* Hero Visuals & Floating Status Cards */}
       <div className="hero-visual">
         <div className="pro-image-container">
-          <img src="/assets/electrician_hero.jpg" alt="SkillHub Professional" className="hero-bg-img" />
+          <Image src="/assets/electrician_hero.jpg" alt="SkillHub Professional" width={600} height={600} priority className="hero-bg-img" />
 
           {/* Card 1: Best Match */}
           <div className="floating-status-card top">
-            <span className="status-card-label">Best match preview</span>
+            <span className="status-card-label">Live Opportunity</span>
             <div className="status-card-body">
-              <img src="/assets/daniel_morgan.jpg" alt="Daniel Morgan" className="mini-avatar" />
+              <Image src="/assets/daniel_morgan.jpg" alt="Rafiq Hasan" width={40} height={40} className="mini-avatar" />
               <div>
-                <h5>Daniel Morgan</h5>
-                <p>Plumber</p>
-                <div className="mini-rating">★ 4.9 <span className="muted">• Verified WorkPass</span></div>
+                <h5>Rafiq Hasan</h5>
+                <p>Waiter • ৳450/hr</p>
+                <div className="mini-rating">★ 4.9 <span className="muted">• 2.1 km away</span></div>
                 <span className="badge-verified">✔ Verified</span>
               </div>
             </div>
           </div>
 
-          {/* Card 2: Shift Filled */}
+          {/* Card 2: Shift Capacity */}
           <div className="floating-status-card middle">
-            <span className="status-card-label">Shift capacity preview</span>
+            <span className="status-card-label">Tomorrow 8 AM - 4 PM</span>
             <div className="status-card-body">
-              <div className="shift-icon-box">☕</div>
+              <div className="shift-icon-box">📦</div>
               <div>
-                <h5>Barista shift</h5>
-                <p>Fri, 16 May • 16:00–21:00</p>
-                <p className="muted">Soho Café</p>
-                <span className="badge-filled">Filled</span>
+                <h5>Warehouse Assistant</h5>
+                <p>৳380/hr • ৳3,040 total</p>
+                <p className="muted">RapidLogistics, Dhanmondi</p>
+                <span className="badge-filled">Confirmed</span>
               </div>
             </div>
           </div>
@@ -241,14 +264,206 @@ export default function Home() {
             <div className="status-card-body">
               <div className="shield-icon-box">🛡️</div>
               <div>
-                <h5>SkillProof Verified</h5>
-                <p className="muted">Audited credentials and proof</p>
-                <span className="badge-protected">Verified</span>
+                <h5>WorkPass Verified</h5>
+                <p className="muted">Guaranteed payment escrow</p>
+                <span className="badge-protected">Protected</span>
               </div>
             </div>
           </div>
 
-          <div className="concept-note">Interactive preview &amp; pilot demonstration</div>
+          <div className="concept-note">WORVO Live Demonstration • Dhaka Pilot</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Stats & Trust Bar from Screen 1 */}
+  <section className="border-y border-slate-800/80 bg-[#080D1A]/70 py-8 px-4 sm:px-8">
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 items-center">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-900/40 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-lg">
+            👤
+          </div>
+          <div>
+            <div className="text-2xl font-black text-white">50K+</div>
+            <div className="text-xs text-slate-400 font-medium">Active workers</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-900/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-lg">
+            🏢
+          </div>
+          <div>
+            <div className="text-2xl font-black text-white">12K+</div>
+            <div className="text-xs text-slate-400 font-medium">Businesses</div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold text-lg">
+            ⚡
+          </div>
+          <div>
+            <div className="text-2xl font-black text-white">200K+</div>
+            <div className="text-xs text-slate-400 font-medium">Shifts completed</div>
+          </div>
+        </div>
+
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/20 text-center sm:text-right">
+          <div className="text-xs font-bold text-blue-300 italic">&quot;Real People, Real Work, A Brighter Tomorrow&quot;</div>
+          <div className="text-[10px] text-slate-400 mt-0.5">WORVO by SkillHub • Dhaka, Bangladesh</div>
+        </div>
+      </div>
+
+      {/* Trusted By Brands */}
+      <div className="pt-4 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-4 text-xs font-bold text-slate-400">
+        <span className="text-slate-500 text-[11px] uppercase tracking-wider">Trusted by growing businesses:</span>
+        <div className="flex flex-wrap items-center gap-6 sm:gap-10 text-slate-400 tracking-wider">
+          <span className="hover:text-white transition font-black text-sm">bKash</span>
+          <span className="hover:text-white transition font-black text-sm text-red-400">Pathao</span>
+          <span className="hover:text-white transition font-black text-sm text-blue-400">Unilever</span>
+          <span className="hover:text-white transition font-black text-sm text-amber-400">Daraz</span>
+          <span className="hover:text-white transition font-black text-sm">REHAB</span>
+          <span className="hover:text-white transition font-black text-sm">CITY GROUP</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Live Opportunities & Work Near You Map Card (from Screen 1) */}
+  <section className="py-12 px-4 sm:px-8 max-w-7xl mx-auto space-y-6">
+    <div className="flex items-center justify-between">
+      <div>
+        <h2 className="text-2xl font-extrabold text-white tracking-tight">Live Opportunities Near You</h2>
+        <p className="text-sm text-slate-400 mt-0.5">Verified hourly shifts and immediate task needs across Dhaka pilot zones.</p>
+      </div>
+      <Link href="/shifts" className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1">
+        See all shifts →
+      </Link>
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* 3 Live Shift Cards (7 cols) */}
+      <div className="lg:col-span-7 space-y-3.5">
+        <div className="p-4 rounded-2xl bg-[#0E1626] border border-slate-800 hover:border-blue-500/50 transition flex items-center justify-between gap-3 shadow-md">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center text-2xl shadow-inner">
+              🍽️
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-bold text-white">Waiter</h4>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/30 text-emerald-300 text-[9px] font-extrabold">High Match</span>
+              </div>
+              <p className="text-xs text-slate-400">The Food Lounge • Today 6 PM - 11 PM</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">📍 1.2 km away • Dhanmondi</p>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="text-base font-black text-white">৳450<span className="text-xs font-normal text-slate-400">/hr</span></div>
+            <Link href="/shifts" className="inline-block mt-1 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold shadow-sm transition">
+              View
+            </Link>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-[#0E1626] border border-slate-800 hover:border-blue-500/50 transition flex items-center justify-between gap-3 shadow-md">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center text-2xl shadow-inner">
+              📦
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-bold text-white">Warehouse Assistant</h4>
+                <span className="px-2 py-0.5 rounded-full bg-blue-950 border border-blue-500/30 text-blue-300 text-[9px] font-extrabold">Verified</span>
+              </div>
+              <p className="text-xs text-slate-400">RapidLogistics • Tomorrow 8 AM - 4 PM</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">📍 2.1 km away • Dhanmondi</p>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="text-base font-black text-white">৳380<span className="text-xs font-normal text-slate-400">/hr</span></div>
+            <Link href="/shifts" className="inline-block mt-1 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold shadow-sm transition">
+              View
+            </Link>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-[#0E1626] border border-slate-800 hover:border-blue-500/50 transition flex items-center justify-between gap-3 shadow-md">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 flex items-center justify-center text-2xl shadow-inner">
+              🏍️
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-bold text-white">Delivery Rider</h4>
+                <span className="px-2 py-0.5 rounded-full bg-amber-950 border border-amber-500/30 text-amber-300 text-[9px] font-extrabold">Starts in 45 min</span>
+              </div>
+              <p className="text-xs text-slate-400">CityEats Express • Instant Shift</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">📍 0.9 km away • Mohammadpur</p>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className="text-base font-black text-white">৳420<span className="text-xs font-normal text-slate-400">/hr</span></div>
+            <Link href="/shifts" className="inline-block mt-1 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold shadow-sm transition">
+              View
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Work Near You Interactive Map Card & Testimonial (5 cols) */}
+      <div className="lg:col-span-5 space-y-4">
+        <div className="relative h-60 rounded-2xl overflow-hidden bg-[#0A0F1D] border border-slate-800 shadow-xl flex flex-col justify-between p-4">
+          <div className="absolute inset-0 bg-[radial-gradient(#1E293B_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>📍</span> Work Near You
+            </span>
+            <span className="text-[10px] text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+              328 Active Shifts
+            </span>
+          </div>
+
+          {/* Map pins */}
+          <div className="relative z-10 my-auto h-24">
+            <div className="absolute left-[20%] top-[20%] w-6 h-6 rounded-full bg-blue-500/80 border border-white flex items-center justify-center text-xs shadow-lg animate-bounce">
+              🍽️
+            </div>
+            <div className="absolute left-[65%] top-[30%] w-6 h-6 rounded-full bg-purple-500/80 border border-white flex items-center justify-center text-xs shadow-lg">
+              📦
+            </div>
+            <div className="absolute left-[45%] top-[60%] w-6 h-6 rounded-full bg-emerald-500/80 border border-white flex items-center justify-center text-xs shadow-lg">
+              🏍️
+            </div>
+            <div className="absolute left-[80%] top-[70%] w-6 h-6 rounded-full bg-amber-500/80 border border-white flex items-center justify-center text-xs shadow-lg">
+              🧹
+            </div>
+          </div>
+
+          <div className="relative z-10 flex items-center justify-between">
+            <span className="text-[11px] text-slate-400">Dhaka Metropolitan Area</span>
+            <Link
+              href="/workers"
+              className="px-3.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold shadow-md transition"
+            >
+              Open Map →
+            </Link>
+          </div>
+        </div>
+
+        {/* Testimonial Quote */}
+        <div className="p-3.5 rounded-2xl bg-[#0E1626] border border-slate-800 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center text-lg font-bold text-white shrink-0">
+            👨
+          </div>
+          <div className="text-xs">
+            <p className="text-slate-300 italic">&quot;SkillHub gave me flexible work and helped me support my family.&quot;</p>
+            <div className="text-slate-500 text-[10px] mt-0.5 font-semibold">— Rahim, Delivery Partner (Mirpur)</div>
+          </div>
         </div>
       </div>
     </div>
@@ -404,7 +619,7 @@ export default function Home() {
             </div>
           </div>
           <div className="passport-profile">
-            <img src="/assets/maria_santos.jpg" alt="Maria Santos" className="passport-avatar" />
+            <Image src="/assets/maria_santos.jpg" alt="Maria Santos" width={44} height={44} className="passport-avatar" />
             <div>
               <h4>Maria Santos</h4>
               <p className="muted">Kitchen Assistant</p>
@@ -456,7 +671,7 @@ export default function Home() {
             <span className="badge-blue">Shifts</span>
           </div>
           <div className="shift-img-wrapper">
-            <img src="/assets/barista_shift.jpg" alt="Barista Shift" className="shift-img" />
+            <Image src="/assets/barista_shift.jpg" alt="Barista Shift" width={400} height={180} className="shift-img" />
           </div>
           <div className="shift-info">
             <h4>Barista</h4>
@@ -632,7 +847,7 @@ export default function Home() {
           <div className="stars">★★★★★</div>
           <p className="review-text">&ldquo;Booked a plumber at 8am, fixed by 10am. Brilliant experience.&rdquo;</p>
           <div className="reviewer">
-            <img src="/assets/daniel_morgan.jpg" alt="James W." className="reviewer-img" />
+            <Image src="/assets/daniel_morgan.jpg" alt="James W." width={40} height={40} className="reviewer-img" />
             <div>
               <h5>James W.</h5>
               <p className="muted">Homeowner, London</p>
@@ -644,7 +859,7 @@ export default function Home() {
           <div className="stars">★★★★★</div>
           <p className="review-text">&ldquo;I fill shifts fast and the payments are always on time. Great platform.&rdquo;</p>
           <div className="reviewer">
-            <img src="/assets/maria_santos.jpg" alt="Maria S." className="reviewer-img" />
+            <Image src="/assets/maria_santos.jpg" alt="Maria S." width={40} height={40} className="reviewer-img" />
             <div>
               <h5>Maria S.</h5>
               <p className="muted">Kitchen Assistant</p>
@@ -699,9 +914,9 @@ export default function Home() {
               <line x1="14.5" y1="13.5" x2="18.5" y2="11.5" stroke="#FFFFFF" strokeWidth="2"/>
               <line x1="14.5" y1="18.5" x2="18.5" y2="20.5" stroke="#FFFFFF" strokeWidth="2"/>
             </svg>
-            <span className="logo-text">SkillHub</span>
+            <span className="logo-text font-bold">WORVO <span className="text-xs font-normal text-slate-400">by SkillHub</span></span>
           </a>
-          <p className="brand-sub">The platform for physical work. Services and shifts. Powered by ATLAS Verified Workforce Infrastructure.</p>
+          <p className="brand-sub">The verified platform for physical work. On-demand jobs, shifts and tasks powered by ATLAS Verified Workforce Infrastructure.</p>
           <div className="social-icons">
             <a href="#">FB</a>
             <a href="#">IG</a>
@@ -713,19 +928,19 @@ export default function Home() {
         <div className="footer-col">
           <h5>Platform</h5>
           <ul>
-            <li><a href="#">Services</a></li>
-            <li><a href="#">Shifts</a></li>
-            <li><a href="#">How it Works</a></li>
-            <li><a href="#">Safety</a></li>
+            <li><Link href="/jobs">Jobs</Link></li>
+            <li><Link href="/shifts">Shifts</Link></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#how-it-works">How it Works</a></li>
           </ul>
         </div>
 
         <div className="footer-col">
           <h5>For businesses</h5>
           <ul>
-            <li><a href="#">Why SkillHub</a></li>
+            <li><Link href="/onboarding/employer">Hire People</Link></li>
+            <li><Link href="/onboarding/employer">Business Portal</Link></li>
             <li><a href="#">Pricing</a></li>
-            <li><a href="#">Resources</a></li>
             <li><a href="#">Enterprise</a></li>
           </ul>
         </div>
@@ -733,9 +948,9 @@ export default function Home() {
         <div className="footer-col">
           <h5>For workers</h5>
           <ul>
-            <li><a href="#">Find shifts</a></li>
-            <li><a href="#">Career growth</a></li>
-            <li><a href="#">Resources</a></li>
+            <li><Link href="/shifts">Find shifts</Link></li>
+            <li><Link href="/onboarding/worker">WorkPass</Link></li>
+            <li><Link href="/dashboard/worker">My Shifts</Link></li>
             <li><a href="#">Support</a></li>
           </ul>
         </div>
@@ -761,9 +976,9 @@ export default function Home() {
       </div>
 
       <div className="footer-bottom-v2">
-        <p>&copy; 2026 SkillHub. All rights reserved.</p>
+        <p>&copy; 2026 WORVO / SkillHub. All rights reserved.</p>
         <div className="bottom-controls">
-          <span className="ctrl">📍 London, UK ▾</span>
+          <span className="ctrl">📍 Dhaka, BD ▾</span>
           <span className="ctrl">🌐 EN ▾</span>
         </div>
       </div>

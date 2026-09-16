@@ -28,10 +28,10 @@ describe("landing page", () => {
       </AuthProvider>
     );
 
-    expect(screen.getAllByText("SkillHub")[0]).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 1, name: /Anything breaks/i })).toBeInTheDocument();
-    expect(screen.getByText("Hire workers")).toBeInTheDocument();
-    expect(screen.getByText("Find work")).toBeInTheDocument();
+    expect(screen.getAllByText(/SkillHub/i)[0]).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: /Work when you want/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/Hire/i)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/Find Work/i)[0]).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Log in/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Get started/i })).toBeInTheDocument();
   });
