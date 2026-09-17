@@ -45,11 +45,11 @@ export default function TrustBar() {
         </div>
 
         {/* Pilot Partner Brands */}
-        <div className="pt-4 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-4 text-xs font-bold text-slate-400">
+        <div className="flex flex-col items-start gap-4 border-t border-slate-800/60 pt-5 text-xs font-bold text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-slate-500 text-[11px] uppercase tracking-wider">
             Supporting pilot employers & logistics:
           </span>
-          <div className="flex flex-wrap items-center gap-6 sm:gap-10 text-slate-400 tracking-wider">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-slate-400 tracking-wider sm:gap-x-10">
             <span className="hover:text-white transition font-black text-sm text-pink-400">bKash</span>
             <span className="hover:text-white transition font-black text-sm text-red-400">Pathao</span>
             <span className="hover:text-white transition font-black text-sm text-amber-400">Daraz</span>

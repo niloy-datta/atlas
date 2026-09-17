@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Navbar from "../../components/navigation/Navbar";
+import WorkspaceSidebar from "../../components/navigation/WorkspaceSidebar";
 
 interface MyShiftItem {
   id: string;
@@ -82,6 +84,7 @@ export default function MyShiftsPage() {
 
   return (
     <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col selection:bg-blue-500 selection:text-white">
+      <Navbar />
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-xl shadow-2xl shadow-blue-500/20 border border-blue-400/30 text-sm font-medium flex items-center gap-3 animate-fade-in">
@@ -91,7 +94,7 @@ export default function MyShiftsPage() {
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#0B1120]/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="hidden">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5">
             <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
@@ -154,8 +157,9 @@ export default function MyShiftsPage() {
 
       {/* Main Container */}
       <div className="flex-1 flex max-w-[1700px] w-full mx-auto">
+        <WorkspaceSidebar />
         {/* Left Sidebar */}
-        <aside className="hidden xl:flex flex-col w-64 border-r border-slate-800/80 bg-[#080D1A]/60 p-5 shrink-0 gap-6">
+        <aside className="hidden">
           <div className="p-3.5 rounded-2xl bg-[#0E1626] border border-slate-800 flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-lg font-bold text-white shadow-md">
               👨‍💼

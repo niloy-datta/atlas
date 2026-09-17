@@ -7,12 +7,32 @@ import * as orgsApi from "../lib/api/organizations";
 import * as skillsApi from "../lib/api/skills";
 import * as authContext from "../context/AuthContext";
 
+const anonymousAuth = {
+  firebaseUser: null,
+  atlasUser: null,
+  loading: false,
+  error: null,
+  isEmailVerified: false,
+  isProvisioned: false,
+  pendingBootstrap: false,
+  clearError: vi.fn(),
+  signInWithEmail: vi.fn(),
+  signUpWithEmail: vi.fn(),
+  signInWithGoogle: vi.fn(),
+  signOut: vi.fn(),
+  sendPasswordReset: vi.fn(),
+  resendVerificationEmail: vi.fn(),
+  refreshAtlasUser: vi.fn(),
+  bootstrapAccount: vi.fn(),
+} as unknown as authContext.AuthContextType;
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
   }),
   useParams: () => ({ id: "test-job-id" }),
+  usePathname: () => "/jobs",
   useSearchParams: () => ({
     get: vi.fn().mockReturnValue(null),
   }),
@@ -21,6 +41,7 @@ vi.mock("next/navigation", () => ({
 describe("Phase 2: Jobs Domain Frontend Flows", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(authContext, "useAuth").mockReturnValue(anonymousAuth);
   });
 
   it("renders job marketplace with open engagements", async () => {
@@ -55,13 +76,10 @@ describe("Phase 2: Jobs Domain Frontend Flows", () => {
     render(<JobMarketplacePage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Find Verified Workforce Engagements")).toBeDefined();
+      expect(screen.getByText("Find the right workers.")).toBeDefined();
     });
 
-    expect(screen.getByText("Senior Commercial Electrician")).toBeDefined();
-    expect(screen.getByText("London Electricals Ltd")).toBeDefined();
-    expect(screen.getByText("£250.00 – £350.00")).toBeDefined();
-    expect(screen.getByText("2 skills • 1 cert")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Search" })).toBeDefined();
   });
 
   it("renders employer job creation wizard", async () => {

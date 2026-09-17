@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Navbar from "../../components/navigation/Navbar";
 import Footer from "../../components/navigation/Footer";
+import WorkspaceSidebar from "../../components/navigation/WorkspaceSidebar";
 
 interface ServiceCategory {
   id: string;
@@ -131,7 +132,9 @@ export default function ServicesPage() {
     <div className="min-h-screen flex flex-col bg-[#070B14] text-slate-100">
       <Navbar />
 
-      <main id="main-content" className="flex-1">
+      <div className="flex flex-1 min-w-0">
+        <WorkspaceSidebar />
+        <main id="main-content" className="min-w-0 flex-1">
         {/* Hero Section */}
         <section className="py-12 sm:py-16 border-b border-slate-800/80 bg-gradient-to-b from-[#0A1020] to-[#070B14]">
           <div className="section-container">
@@ -413,7 +416,8 @@ export default function ServicesPage() {
             ))}
           </div>
         </section>
-      </main>
+        </main>
+      </div>
 
       <Footer />
     </div>

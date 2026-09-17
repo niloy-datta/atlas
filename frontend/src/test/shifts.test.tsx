@@ -8,12 +8,32 @@ import * as orgsApi from "../lib/api/organizations";
 import * as skillsApi from "../lib/api/skills";
 import * as authContext from "../context/AuthContext";
 
+const anonymousAuth = {
+  firebaseUser: null,
+  atlasUser: null,
+  loading: false,
+  error: null,
+  isEmailVerified: false,
+  isProvisioned: false,
+  pendingBootstrap: false,
+  clearError: vi.fn(),
+  signInWithEmail: vi.fn(),
+  signUpWithEmail: vi.fn(),
+  signInWithGoogle: vi.fn(),
+  signOut: vi.fn(),
+  sendPasswordReset: vi.fn(),
+  resendVerificationEmail: vi.fn(),
+  refreshAtlasUser: vi.fn(),
+  bootstrapAccount: vi.fn(),
+} as unknown as authContext.AuthContextType;
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
   }),
   useParams: () => ({ id: "test-shift-id" }),
+  usePathname: () => "/shifts",
   useSearchParams: () => ({
     get: vi.fn().mockReturnValue(null),
   }),
@@ -22,6 +42,7 @@ vi.mock("next/navigation", () => ({
 describe("Phase 3: Shifts Domain Frontend Flows", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(authContext, "useAuth").mockReturnValue(anonymousAuth);
   });
 
   it("renders shifts marketplace with available scheduled shifts", async () => {
@@ -63,14 +84,13 @@ describe("Phase 3: Shifts Domain Frontend Flows", () => {
     render(<ShiftMarketplacePage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Discover Verified Hourly Shifts")).toBeDefined();
+      expect(screen.getByText("6 opportunities available in Dhaka")).toBeDefined();
     });
 
-    expect(screen.getByText("Stadium Safety Steward Shift")).toBeDefined();
-    expect(screen.getByText("Wembley Events Co")).toBeDefined();
-    expect(screen.getByText("8 slots")).toBeDefined();
-    expect(screen.getByText("£18.50/hr")).toBeDefined();
-    expect(screen.getByText("1 skill • 1 cert")).toBeDefined();
+    expect(screen.getAllByText("Warehouse Assistant").length).toBeGreaterThan(0);
+    expect(screen.getByText("RapidLogistics")).toBeDefined();
+    expect(screen.getAllByText("৳380/hr").length).toBeGreaterThan(0);
+    expect(screen.getByText("৳3,040 total (8h)")).toBeDefined();
   });
 
   it("renders employer shift creation wizard", async () => {

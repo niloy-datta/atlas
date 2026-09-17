@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import IntentSwitcher, { type UserIntent } from "./IntentSwitcher";
 import WorkSearch from "./WorkSearch";
 import PathwayCards from "./PathwayCards";
@@ -36,7 +37,7 @@ export default function Hero({ onNotice }: HeroProps) {
           </h1>
 
           <p className="hero-subtitle">
-            On-demand hourly shifts, verified job roles, and trusted local services across Dhaka. Real people, verified skills, and guaranteed escrow payouts.
+            Jobs, shifts and local tasks — real work, real people, real opportunities. On-demand hourly shifts and trusted local services across Dhaka with guaranteed escrow payouts.
           </p>
 
           {/* Interactive Intent Switcher & Search Bar */}
@@ -46,93 +47,160 @@ export default function Hero({ onNotice }: HeroProps) {
           {/* Three Direct Entry Pathway Cards */}
           <PathwayCards />
 
-          {/* Pilot Indicators */}
-          <div className="hero-indicators">
-            <div className="indicator-item">
-              <span className="dot-green" aria-hidden="true" />
-              <span>
-                Coverage: <strong>Dhaka Pilot (Dhanmondi, Gulshan, Uttara)</strong>
-              </span>
+          {/* Pilot Indicators & Platform Stats */}
+          <div className="grid grid-cols-3 gap-3 p-3.5 rounded-2xl bg-[#0B1426]/90 border border-slate-800/90 shadow-lg mt-5">
+            <div className="text-center">
+              <div className="text-base sm:text-xl font-black text-white">50K+</div>
+              <div className="text-[11px] text-slate-400 font-medium">Active workers</div>
             </div>
-            <div className="indicator-item">
-              <span className="dot-green" aria-hidden="true" />
-              <span>
-                Trust: <strong>100% NID & Trade Verified</strong>
-              </span>
+            <div className="text-center border-x border-slate-800">
+              <div className="text-base sm:text-xl font-black text-blue-400">12K+</div>
+              <div className="text-[11px] text-slate-400 font-medium">Businesses</div>
             </div>
-            <div className="indicator-item">
-              <span className="text-emerald-400 font-bold">৳</span>
-              <span>
-                Rates: <strong>Shifts starting from ৳350/hr</strong>
-              </span>
+            <div className="text-center">
+              <div className="text-base sm:text-xl font-black text-emerald-400">200K+</div>
+              <div className="text-[11px] text-slate-400 font-medium">Shifts completed</div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Hero Visual with Real Proof Cards */}
-        <div className="hero-visual hidden md:block">
-          <div className="pro-image-container">
-            <Image
-              src="/assets/electrician_hero.jpg"
-              alt="WORVO Verified Tradesperson at Work in Dhaka"
-              width={600}
-              height={500}
-              priority
-              className="hero-bg-img"
-            />
+        {/* Right Column: Hero Visual with Real Proof Cards from Master Mockup */}
+        <div className="hero-visual hidden lg:block space-y-4">
+          {/* Pro image & Live Opportunities Near You */}
+          <div className="relative rounded-3xl overflow-hidden border border-slate-800 bg-[#0B1426]/90 p-4 shadow-2xl space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <h3 className="text-sm font-extrabold text-white">Live Opportunities Near You</h3>
+              </div>
+              <Link href="/shifts" className="text-xs font-bold text-blue-400 hover:text-blue-300">
+                See all →
+              </Link>
+            </div>
 
-            {/* Floating Card 1: Verified Worker Match */}
-            <div className="floating-status-card top">
-              <span className="status-card-label">Verified Worker</span>
-              <div className="status-card-body">
-                <Image
-                  src="/assets/daniel_morgan.jpg"
-                  alt="Rafiq Hasan avatar"
-                  width={36}
-                  height={36}
-                  className="mini-avatar"
-                />
-                <div className="min-w-0">
-                  <h4 className="text-xs font-bold text-white truncate">Rafiq Hasan</h4>
-                  <p className="text-[11px] text-slate-300">Barista • ৳450/hr</p>
-                  <div className="text-[10px] text-amber-400 font-semibold mt-0.5">
-                    ★ 4.9 <span className="text-slate-400 font-normal">• Dhanmondi</span>
+            {/* Opportunity Cards matching Master Design Screen 1 */}
+            <div className="space-y-2.5">
+              {/* Card 1: Waiter */}
+              <div className="p-3 rounded-xl bg-[#070D1B] border border-slate-800/90 flex items-center justify-between gap-3 hover:border-blue-500/50 transition">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-950/80 border border-purple-500/30 flex items-center justify-center text-lg shrink-0">
+                    ☕
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-white">Restaurant Waiter</h4>
+                      <span className="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 text-[9px] font-bold">
+                        High Match
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">The Food Lounge • Today 6 PM - 11 PM</p>
+                    <p className="text-[10px] text-slate-500">📍 1.2 km away • Dhanmondi</p>
                   </div>
                 </div>
+                <div className="text-right shrink-0">
+                  <div className="text-xs font-black text-emerald-400">৳450/hr</div>
+                  <Link
+                    href="/shifts/demo"
+                    className="mt-1 inline-block px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow-sm transition"
+                  >
+                    View
+                  </Link>
+                </div>
+              </div>
+
+              {/* Card 2: Warehouse Assistant */}
+              <div className="p-3 rounded-xl bg-[#070D1B] border border-slate-800/90 flex items-center justify-between gap-3 hover:border-blue-500/50 transition">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-500/30 flex items-center justify-center text-lg shrink-0">
+                    📦
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-white">Warehouse Assistant</h4>
+                      <span className="px-1.5 py-0.2 rounded bg-blue-950 text-blue-300 text-[9px] font-bold">
+                        Verified
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">RapidLogistics • Tomorrow 8 AM - 4 PM</p>
+                    <p className="text-[10px] text-slate-500">📍 2.8 km away • Mirpur</p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-xs font-black text-emerald-400">৳380/hr</div>
+                  <Link
+                    href="/shifts/demo"
+                    className="mt-1 inline-block px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow-sm transition"
+                  >
+                    View
+                  </Link>
+                </div>
+              </div>
+
+              {/* Card 3: Delivery Rider */}
+              <div className="p-3 rounded-xl bg-[#070D1B] border border-slate-800/90 flex items-center justify-between gap-3 hover:border-blue-500/50 transition">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-500/30 flex items-center justify-center text-lg shrink-0">
+                    🛵
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="text-xs font-bold text-white">Delivery Rider</h4>
+                      <span className="px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 text-[9px] font-bold">
+                        Starts in 45m
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">CityEats • Flexible shifts</p>
+                    <p className="text-[10px] text-slate-500">📍 0.9 km away • Gulshan</p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-xs font-black text-emerald-400">৳420/hr</div>
+                  <Link
+                    href="/shifts/demo"
+                    className="mt-1 inline-block px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow-sm transition"
+                  >
+                    View
+                  </Link>
+                </div>
               </div>
             </div>
 
-            {/* Floating Card 2: Shift Opportunity */}
-            <div className="floating-status-card middle">
-              <span className="status-card-label">Tomorrow 8 AM - 4 PM</span>
-              <div className="status-card-body">
-                <div className="shift-icon-box" aria-hidden="true">
-                  📦
-                </div>
+            {/* Work Near You Mini-Map Card */}
+            <div className="p-3 rounded-xl bg-gradient-to-r from-blue-950/50 via-indigo-950/40 to-[#070D1B] border border-blue-500/30 flex items-center justify-between">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className="text-xl">🗺️</span>
                 <div className="min-w-0">
-                  <h4 className="text-xs font-bold text-white truncate">Warehouse Assistant</h4>
-                  <p className="text-[11px] text-emerald-400 font-bold">৳380/hr • ৳3,040 total</p>
-                  <p className="text-[10px] text-slate-400 truncate">RapidLogistics • Mirpur</p>
+                  <h4 className="text-xs font-bold text-white">Work Near You in Dhaka</h4>
+                  <p className="text-[11px] text-slate-400">Over 320 shifts active within 5 km</p>
                 </div>
               </div>
+              <Link
+                href="/shifts"
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition"
+              >
+                Open Map
+              </Link>
             </div>
 
-            {/* Floating Card 3: WorkPass Escrow Protection */}
-            <div className="floating-status-card bottom">
-              <span className="status-card-label">ATLAS Protected Payout</span>
-              <div className="status-card-body">
-                <div className="shield-icon-box" aria-hidden="true">
-                  🛡️
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-xs font-bold text-white">WorkPass Escrow</h4>
-                  <p className="text-[10px] text-slate-400">Guaranteed hourly payout</p>
-                  <span className="badge-protected mt-1">Protected</span>
-                </div>
+            {/* Testimonial Quote Chip */}
+            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-start gap-3">
+              <Image
+                src="/assets/daniel_morgan.jpg"
+                alt="Rahim avatar"
+                width={36}
+                height={36}
+                className="rounded-full ring-1 ring-blue-400 object-cover shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] text-slate-300 italic leading-snug">
+                  &quot;SkillHub gave me flexible work and helped me support my family.&quot;
+                </p>
+                <p className="text-[10px] text-blue-400 font-semibold mt-0.5">
+                  — Rahim, Verified Delivery Partner (Dhaka)
+                </p>
               </div>
             </div>
-
-            <div className="concept-note">WORVO Pilot Demo • Dhaka</div>
           </div>
         </div>
       </div>

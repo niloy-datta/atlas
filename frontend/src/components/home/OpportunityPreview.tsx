@@ -88,7 +88,7 @@ export default function OpportunityPreview() {
               key={opp.id}
               className="p-4 sm:p-5 rounded-2xl bg-[#0E1626] border border-slate-800 hover:border-blue-500/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md"
             >
-              <div className="flex items-start gap-3.5">
+              <div className="flex min-w-0 flex-1 items-start gap-3.5">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-700 flex items-center justify-center text-2xl shrink-0 shadow-inner">
                   {opp.icon}
                 </div>
@@ -118,7 +118,7 @@ export default function OpportunityPreview() {
                 </div>
               </div>
 
-              <div className="flex items-center sm:flex-col justify-between sm:justify-center sm:items-end shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-800/80">
+              <div className="flex w-full shrink-0 items-center justify-between border-t border-slate-800/80 pt-3 sm:w-auto sm:flex-col sm:items-end sm:justify-center sm:border-t-0 sm:pt-0">
                 <div className="text-left sm:text-right">
                   <div className="text-base font-black text-white">
                     ৳{opp.hourlyRate}
@@ -181,8 +181,8 @@ export default function OpportunityPreview() {
               </div>
             </div>
 
-            <div className="relative z-10 flex items-center justify-between pt-2 border-t border-slate-800/80">
-              <span className="text-xs text-slate-400">Dhanmondi • Gulshan • Mirpur</span>
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+              <span className="min-w-0 truncate text-xs text-slate-400">Dhanmondi • Gulshan • Mirpur</span>
               <Link
                 href="/workers"
                 className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold shadow-md transition"
@@ -193,12 +193,12 @@ export default function OpportunityPreview() {
           </div>
 
           {/* Testimonial Quote */}
-          <div className="p-4 rounded-2xl bg-[#0E1626] border border-slate-800 flex items-center gap-3.5 shadow-md">
+          <div className="p-4 rounded-2xl bg-[#0E1626] border border-slate-800 flex items-start gap-3.5 shadow-md">
             <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center text-xl font-bold text-white shrink-0">
               👨‍💼
             </div>
-            <div className="text-xs">
-              <p className="text-slate-300 italic leading-relaxed">
+            <div className="min-w-0 text-xs">
+              <p className="line-clamp-3 text-slate-300 italic leading-relaxed">
                 &quot;WORVO allows me to take hospitality shifts in Dhanmondi between my classes. The hourly pay is directly deposited without delay.&quot;
               </p>
               <div className="text-slate-400 text-[11px] mt-1 font-semibold">

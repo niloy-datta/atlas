@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Navbar from "../../components/navigation/Navbar";
+import WorkspaceSidebar from "../../components/navigation/WorkspaceSidebar";
 
 interface WorkerProfile {
   id: string;
@@ -173,6 +175,7 @@ export default function FindWorkersPage() {
 
   return (
     <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col selection:bg-blue-500 selection:text-white">
+      <Navbar />
       {/* Notification Toast */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-xl shadow-2xl shadow-blue-500/20 border border-blue-400/30 text-sm font-medium flex items-center gap-3 animate-fade-in">
@@ -182,7 +185,7 @@ export default function FindWorkersPage() {
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#0B1120]/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="hidden">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black shadow-lg shadow-blue-500/20">
@@ -227,7 +230,9 @@ export default function FindWorkersPage() {
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 max-w-[1700px] w-full mx-auto p-4 sm:p-7 space-y-6">
+      <div className="flex flex-1 min-w-0 w-full max-w-[1700px] mx-auto">
+        <WorkspaceSidebar />
+        <main className="min-w-0 flex-1 p-4 sm:p-7 space-y-6">
         {/* Hero Section from find work ui.png */}
         <div className="relative rounded-3xl p-6 sm:p-8 overflow-hidden bg-gradient-to-r from-[#0E172B] via-[#111C35] to-[#14122E] border border-slate-800 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="max-w-xl z-10">
@@ -683,6 +688,7 @@ export default function FindWorkersPage() {
             </div>
           </div>
         </div>
+        </main>
       </div>
     </div>
   );

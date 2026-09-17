@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
+import SupportChatbot from "../components/ai/FreeAIAssistant";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -84,6 +85,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           <div className="flex-1 flex flex-col w-full min-w-0">
             {children}
           </div>
+          <SupportChatbot />
         </AuthProvider>
       </body>
     </html>

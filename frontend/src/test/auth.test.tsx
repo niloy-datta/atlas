@@ -17,6 +17,7 @@ vi.mock("next/navigation", () => ({
     replace: vi.fn(),
     prefetch: vi.fn(),
   }),
+  usePathname: () => "/",
   useSearchParams: () => ({
     get: (key: string) => (key === "role" ? null : null),
   }),

@@ -29,12 +29,14 @@ import {
   cancelInvitation,
   InvitationSummary,
 } from "../../../lib/api/invitations";
+import Navbar from "../../../components/navigation/Navbar";
+import WorkspaceSidebar from "../../../components/navigation/WorkspaceSidebar";
 
 export default function EmployerDashboardPage() {
-  const { firebaseUser, atlasUser, loading: authLoading, signOut } = useAuth();
+  const { firebaseUser, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  const [orgs, setOrgs] = useState<OrganizationSummary[]>([]);
+  const [, setOrgs] = useState<OrganizationSummary[]>([]);
   const [selectedOrg, setSelectedOrg] = useState<OrganizationView | null>(null);
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [members, setMembers] = useState<MemberRow[]>([]);
@@ -145,44 +147,10 @@ export default function EmployerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Top Navbar */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
-              <svg className="w-7 h-7" viewBox="0 0 32 32" fill="none">
-                <circle cx="10" cy="16" r="6" fill="#FF5A1F" />
-                <circle cx="22" cy="10" r="4" fill="#0F172A" />
-                <circle cx="22" cy="22" r="4" fill="#0F172A" />
-                <line x1="14.5" y1="13.5" x2="18.5" y2="11.5" stroke="#0F172A" strokeWidth="2" />
-                <line x1="14.5" y1="18.5" x2="18.5" y2="20.5" stroke="#0F172A" strokeWidth="2" />
-              </svg>
-              <span className="font-bold text-lg text-slate-900">SkillHub</span>
-            </Link>
-            <nav className="flex items-center gap-4 text-sm font-medium text-slate-600">
-              <Link href="/dashboard/employer" className="text-blue-600 font-semibold">Dashboard</Link>
-              <Link href="/shifts" className="hover:text-slate-900 font-medium">Shifts Roster</Link>
-              <Link href="/jobs" className="hover:text-slate-900">Job Marketplace</Link>
-              <Link href="/organizations" className="hover:text-slate-900">Organizations</Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs px-2.5 py-1 bg-blue-100 text-blue-700 font-semibold rounded-full">
-              EMPLOYER{orgs.length > 1 ? ` (${orgs.length} orgs)` : ""}
-            </span>
-            <span className="text-sm text-slate-700 font-medium">{atlasUser?.email || firebaseUser?.email}</span>
-            <button
-              onClick={() => signOut()}
-              className="text-sm text-slate-500 hover:text-slate-900 font-medium ml-2"
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Navbar />
+      <div className="flex min-w-0">
+        <WorkspaceSidebar />
+        <main className="min-w-0 flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center justify-between">
             <span>{error}</span>
@@ -630,7 +598,8 @@ export default function EmployerDashboardPage() {
             </div>
           </div>
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

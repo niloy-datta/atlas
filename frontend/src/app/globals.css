@@ -55,8 +55,6 @@
 
 *, *::before, *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
@@ -204,6 +202,26 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Workspace pages share one persistent desktop shell: fixed sidebar + top bar. */
+@media (min-width: 1024px) {
+  .workspace-navbar {
+    padding-left: 16rem;
+  }
+
+  .workspace-navbar .nav-container {
+    max-width: none;
+    margin: 0;
+  }
+
+  .workspace-navbar .brand-logo {
+    display: none;
+  }
+
+  .workspace-navbar .nav-left {
+    gap: 0;
+  }
 }
 
 .location-picker, .lang-picker {

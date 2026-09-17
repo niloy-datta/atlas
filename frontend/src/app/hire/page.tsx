@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Navbar from "../../components/navigation/Navbar";
+import WorkspaceSidebar from "../../components/navigation/WorkspaceSidebar";
 
 interface WorkerCandidate {
   id: string;
@@ -136,6 +138,7 @@ export default function HirePeoplePage() {
 
   return (
     <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col selection:bg-blue-500 selection:text-white">
+      <Navbar />
       {/* Toast notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-xl shadow-2xl shadow-blue-500/20 border border-blue-400/30 text-sm font-medium flex items-center gap-3 animate-fade-in">
@@ -145,7 +148,7 @@ export default function HirePeoplePage() {
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#0B1120]/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="hidden">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black shadow-lg shadow-blue-500/20">
@@ -157,7 +160,7 @@ export default function HirePeoplePage() {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
             <Link href="/jobs" className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">
               Find Work
             </Link>
@@ -215,8 +218,9 @@ export default function HirePeoplePage() {
 
       {/* Workspace Area: Sidebar + Content */}
       <div className="flex-1 flex max-w-[1700px] w-full mx-auto">
+        <WorkspaceSidebar />
         {/* Left Sidebar */}
-        <aside className="hidden xl:flex flex-col w-64 border-r border-slate-800/80 bg-[#080D1A]/60 p-5 shrink-0 gap-6">
+        <aside className="hidden">
           <div className="p-3.5 rounded-xl bg-[#0E1626] border border-slate-800 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-900/40 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
               SHL
@@ -509,11 +513,11 @@ export default function HirePeoplePage() {
                   )}
 
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-700 flex items-center justify-center text-2xl shadow-inner">
                         {worker.avatar}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <h4 className="text-sm font-bold text-white">{worker.name}</h4>
                           <span className="text-blue-400 text-xs" title="Verified Worker">✓</span>
@@ -530,7 +534,7 @@ export default function HirePeoplePage() {
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="shrink-0 text-right">
                       <div className="text-base font-black text-white">৳{worker.hourlyRate}<span className="text-xs font-normal text-slate-400">/hr</span></div>
                       <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                         worker.status === "Available Now"
@@ -584,7 +588,7 @@ export default function HirePeoplePage() {
                   onClick={handleAiPromptClick}
                   className="p-3 rounded-xl bg-slate-900/80 border border-slate-700/60 text-xs text-slate-300 cursor-pointer hover:border-blue-400 hover:bg-slate-900 transition flex items-center justify-between group"
                 >
-                  <span className="italic">&quot;I need 5 warehouse workers tomorrow from 6 PM to 12 AM in Savar&quot;</span>
+                  <span className="min-w-0 flex-1 italic">&quot;I need 5 warehouse workers tomorrow from 6 PM to 12 AM in Savar&quot;</span>
                   <span className="text-blue-400 font-bold group-hover:translate-x-0.5 transition-transform">↗</span>
                 </div>
               </div>

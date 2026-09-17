@@ -16,6 +16,7 @@ vi.mock("next/navigation", () => ({
     prefetch: vi.fn(),
   }),
   useParams: () => ({ handle: "test-worker" }),
+  usePathname: () => "/onboarding/worker",
   useSearchParams: () => ({
     get: vi.fn().mockReturnValue("worker"),
   }),

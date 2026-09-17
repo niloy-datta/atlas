@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Navbar from "../../components/navigation/Navbar";
+import WorkspaceSidebar from "../../components/navigation/WorkspaceSidebar";
 
 interface Message {
   id: string;
@@ -156,6 +158,7 @@ export default function MessagesPage() {
 
   return (
     <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col selection:bg-blue-500 selection:text-white">
+      <Navbar />
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 right-5 z-50 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-xl shadow-2xl shadow-blue-500/20 border border-blue-400/30 text-sm font-medium flex items-center gap-3 animate-fade-in">
@@ -165,7 +168,7 @@ export default function MessagesPage() {
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-[#0B1120]/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="hidden">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5">
             <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
@@ -216,8 +219,9 @@ export default function MessagesPage() {
 
       {/* Main Workspace Layout */}
       <div className="flex-1 flex max-w-[1700px] w-full mx-auto">
+        <WorkspaceSidebar />
         {/* Left Sidebar from 8d4bfbe9-8f27-4f01-932e-c0e567508d29.png */}
-        <aside className="hidden xl:flex flex-col w-64 border-r border-slate-800/80 bg-[#080D1A]/60 p-5 shrink-0 gap-6">
+        <aside className="hidden">
           <nav className="flex flex-col gap-1 text-xs font-semibold text-slate-400">
             <Link href="/dashboard/worker" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:text-white hover:bg-slate-800/50 transition">
               <span>📊</span> Dashboard
