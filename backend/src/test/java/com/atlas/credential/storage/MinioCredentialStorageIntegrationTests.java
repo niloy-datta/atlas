@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.util.unit.DataSize;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -19,13 +20,14 @@ import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 @Testcontainers
+@EnabledIfEnvironmentVariable(named = "ATLAS_RUN_MINIO_IT", matches = "true")
 class MinioCredentialStorageIntegrationTests {
     private static final String ACCESS_KEY = "atlas-test-access";
     private static final String SECRET_KEY = "atlas-test-secret-key";
 
     @Container
     private static final GenericContainer<?> MINIO = new GenericContainer<>(DockerImageName.parse(
-            "quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z"))
+            System.getenv().getOrDefault("ATLAS_MINIO_TEST_IMAGE", "quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z")))
             .withEnv("MINIO_ROOT_USER", ACCESS_KEY)
             .withEnv("MINIO_ROOT_PASSWORD", SECRET_KEY)
             .withCommand("server", "/data")

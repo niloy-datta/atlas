@@ -16,8 +16,10 @@ public class OrganizationAccessPolicy {
             OrganizationRole.OWNER, EnumSet.allOf(OrganizationAction.class),
             OrganizationRole.ADMIN, EnumSet.allOf(OrganizationAction.class),
             OrganizationRole.HIRING_MANAGER, EnumSet.of(OrganizationAction.VIEW,
-                    OrganizationAction.PUBLISH_JOBS, OrganizationAction.VIEW_CANDIDATES),
-            OrganizationRole.RECRUITER, EnumSet.of(OrganizationAction.VIEW, OrganizationAction.VIEW_CANDIDATES),
+                    OrganizationAction.PUBLISH_JOBS, OrganizationAction.VIEW_CANDIDATES,
+                    OrganizationAction.MANAGE_WORKFORCE),
+            OrganizationRole.RECRUITER, EnumSet.of(OrganizationAction.VIEW,
+                    OrganizationAction.VIEW_CANDIDATES, OrganizationAction.MANAGE_WORKFORCE),
             OrganizationRole.VIEWER, EnumSet.of(OrganizationAction.VIEW));
 
     private final OrganizationRepository organizations;

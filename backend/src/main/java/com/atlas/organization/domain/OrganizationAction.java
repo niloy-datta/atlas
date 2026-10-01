@@ -6,5 +6,6 @@ public enum OrganizationAction {
     MANAGE_MEMBERS,
     MANAGE_LOCATIONS,
     PUBLISH_JOBS,
-    VIEW_CANDIDATES
+    VIEW_CANDIDATES,
+    MANAGE_WORKFORCE
 }
