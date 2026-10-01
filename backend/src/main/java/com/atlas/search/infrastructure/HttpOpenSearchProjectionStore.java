@@ -86,7 +86,9 @@ public class HttpOpenSearchProjectionStore implements SearchProjectionStore {
     @Override
     public Set<String> ids() {
         String response = send("POST", "/" + index + "/_search",
-                "{"size":10000,"_source":false,"query":{"match_all":{}}}",
+                """
+                {"size":10000,"_source":false,"query":{"match_all":{}}}
+                """,
                 Set.of(200, 404));
         if (response == null || response.isBlank()) return Set.of();
         try {
