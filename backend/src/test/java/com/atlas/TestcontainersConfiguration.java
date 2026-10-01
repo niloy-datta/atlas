@@ -59,7 +59,7 @@ public class TestcontainersConfiguration {
 		public byte[] readAll(String objectKey, long maximumBytes) {
 			byte[] value = objects.get(objectKey);
 			if (value == null) throw new CredentialStorageException("Object not found", new IllegalStateException());
-			if (value.length > maximumBytes) throw new CredentialStorageException("Object too large");
+			if (value.length > maximumBytes) throw new CredentialStorageException("Object too large", new IllegalStateException("scan limit exceeded"));
 			return value.clone();
 		}
 
