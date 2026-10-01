@@ -68,14 +68,14 @@ public class ReservationService {
     public ReservationRow cancel(UUID organizationId, UUID reservationId,
                                  UUID actorId, long version) {
         access.require(organizationId, actorId, OrganizationAction.MANAGE_WORKFORCE);
-        ReservationRow existing = reservations.find(organizationId, reservationId)
+        ReservationRow existing = reservations.find(organizationId, shiftId, reservationId)
                 .orElseThrow(ReservationService::reservationNotFound);
         if (!"CONFIRMED".equals(existing.status())) throw reservationNotFound();
-        if (reservations.cancel(organizationId, reservationId, version, Instant.now(clock)) == 0) {
+        if (reservations.cancel(organizationId, shiftId, reservationId, version, Instant.now(clock)) == 0) {
             throw conflict("RESERVATION_VERSION_CONFLICT", "Reservation changed",
                     "Reload the reservation and retry with its current version.");
         }
-        return reservations.find(organizationId, reservationId)
+        return reservations.find(organizationId, shiftId, reservationId)
                 .orElseThrow(ReservationService::reservationNotFound);
     }
 
