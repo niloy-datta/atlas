@@ -75,7 +75,7 @@ public class ReservationRepository {
                 """, (rs, n) -> map(rs), organizationId, shiftId);
     }
 
-    public Optional<ReservationRow> find(UUID organizationId, UUID reservationId) {
+    public Optional<ReservationRow> find(UUID organizationId, UUID shiftId, UUID reservationId) {
         return jdbc.query("""
                 SELECT id, shift_id, organization_id, worker_user_id, status, version,
                        created_by_user_id, created_at, updated_at
@@ -84,7 +84,7 @@ public class ReservationRepository {
                 """, (rs, n) -> map(rs), organizationId, reservationId).stream().findFirst();
     }
 
-    public int cancel(UUID organizationId, UUID reservationId, long version, Instant now) {
+    public int cancel(UUID organizationId, UUID shiftId, UUID reservationId, long version, Instant now) {
         return jdbc.update("""
                 UPDATE shift_reservations
                    SET status = 'CANCELLED', version = version + 1, updated_at = ?
