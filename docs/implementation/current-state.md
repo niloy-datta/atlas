@@ -14,9 +14,11 @@ License: MIT
 | **Jobs & Shifts Engine** | `PRODUCTION-READY` | Full lifecycle management for fixed jobs and flexible shifts, location geo-tagging, schedule intervals, pay rates, supervisor assignments. |
 | **Applications Domain** | `PRODUCTION-READY` | Phase 9 completed. Unified polymorphic applications (Jobs & Shifts), state machine (`SUBMITTED -> REVIEWING -> SHORTLISTED -> ACCEPTED / REJECTED / WITHDRAWN`), database-enforced integrity (`V11`), optimistic locking. |
 | **Invitations Domain** | `PRODUCTION-READY` | Phase 9 completed. Direct organization-to-worker invitations for jobs/shifts, automatic TTL expiration, acceptance/decline flow, database-enforced candidate targets. |
-| **Database & Invariants** | `HARDENED` | PostgreSQL 18 + PostGIS 3.6. Flyway migrations up to `V13__recurring_availability.sql`. Composite foreign keys, cross-tenant isolation, XOR check constraints (`job_id` vs `shift_id`). |
+| **Database & Invariants** | `HARDENED` | PostgreSQL 18 + PostGIS 3.6. Flyway migrations up to `V14__matching_proficiency_rank.sql`. Composite foreign keys, cross-tenant isolation, XOR check constraints (`job_id` vs `shift_id`). |
 | **Workforce Pools** | `IMPLEMENTED` | Phase 10 reusable organization-scoped worker pools, membership management, duplicate protection, tenant-safe composite foreign keys, and optimistic pool updates. |
 | **Recurring Availability** | `IMPLEMENTED` | Phase 11 timezone-aware weekly rules, date overrides, DST-safe instant resolution, optimistic updates, and worker-scoped isolation. |
+| **Nearby Discovery** | `IMPLEMENTED` | Phase 12 behavior is already present in jobs/shifts: PostGIS geography, GiST indexes, ST_DWithin filtering, and ST_Distance ranking. |
+| **MatchEngine V1** | `IMPLEMENTED` | Phase 13 deterministic ranking with explainable skill, verified-skill, distance, availability, and profile-completeness components. |
 | **Frontend Applications** | `PRODUCTION-READY` | Next.js 16 App Router, React 19, Tailwind CSS. Integrated apply modals, worker invitation & application pipelines, employer applicant management dashboard. |
 | **CI / CD Automation** | `ACTIVE` | GitHub Actions CI workflow (`.github/workflows/ci.yml`) testing backend (Maven wrapper, JUnit 5) and frontend (lint, TypeScript check, Vitest 17 unit tests, Next.js production build). Automated GitHub Pages deployment (`.github/workflows/deploy-pages.yml`). |
 | **Verification Tooling** | `HARDENED` | Cross-platform `scripts/verify.ps1` runs native Maven & npm test suites without WSL path dependencies. |
@@ -28,3 +30,5 @@ License: MIT
 - **Phase 9**: Application & Invitation transactional core, candidate key hardening (`V11`), employer pipeline, worker pipeline, and CI/CD automation.
 - **Phase 10**: Workforce Pools with reusable worker membership, tenant isolation, duplicate protection, and integration tests.
 - **Phase 11**: Recurring Availability & Overrides with IANA timezones, DST-aware resolution, date overrides, and isolation tests.
+- **Phase 12**: Nearby Discovery already implemented through real PostGIS queries and GiST location indexes.
+- **Phase 13**: Deterministic MatchEngine V1 with reproducible scoring, explainable breakdowns, and tenant-isolated match endpoints.
