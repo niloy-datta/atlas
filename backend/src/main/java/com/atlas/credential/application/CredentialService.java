@@ -145,7 +145,7 @@ public class CredentialService {
                         exception.getClass().getSimpleName() + ": " + safeDetail(exception.getMessage()));
             }
 
-            if (outcome.result() == MalwareScanner.ScanResult.CLEAN) {
+            if (CredentialScanPolicy.decide(outcome) == CredentialScanPolicy.Decision.ACCEPT) {
                 credentials.addScanEvent(document.id(), outcome.engine(), outcome.result().name(),
                         safeDetail(outcome.detail()), content.length, null, now);
                 credentials.completeDocument(document.id(), stored.sizeBytes(), detected, "CLEAN", true, now);
