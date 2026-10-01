@@ -20,17 +20,17 @@ public class OutboxRepository {
     public void append(OutboxEvent event) {
         jdbc.update("""
                 INSERT INTO outbox_events
-                    (id, aggregate_type, aggregate_id, event_type, payload,
+                    (id, aggregate_type, aggregate_id, sequence_no, event_type, payload,
                      occurred_at, created_at, published_at, attempts, last_error)
-                VALUES (?, ?, ?, ?, ?::jsonb, ?, ?, NULL, 0, NULL)
-                """, event.id(), event.aggregateType(), event.aggregateId(),
+                VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?, NULL, 0, NULL)
+                """, event.id(), event.aggregateType(), event.aggregateId(), event.sequenceNo(),
                 event.eventType(), event.payload(),
                 Timestamp.from(event.occurredAt()), Timestamp.from(event.createdAt()));
     }
 
     public List<OutboxEvent> pending(int limit) {
         return jdbc.query("""
-                SELECT id, aggregate_type, aggregate_id, event_type, payload::text,
+                SELECT id, aggregate_type, aggregate_id, sequence_no, event_type, payload::text,
                        occurred_at, created_at, published_at, attempts, last_error
                   FROM outbox_events
                  WHERE published_at IS NULL
@@ -64,10 +64,12 @@ public class OutboxRepository {
 
     private static OutboxEvent map(ResultSet rs) throws SQLException {
         Timestamp published = rs.getTimestamp("published_at");
+        Number sequence = (Number) rs.getObject("sequence_no");
         return new OutboxEvent(
                 rs.getObject("id", UUID.class),
                 rs.getString("aggregate_type"),
                 rs.getObject("aggregate_id", UUID.class),
+                sequence == null ? null : sequence.longValue(),
                 rs.getString("event_type"),
                 rs.getString("payload"),
                 rs.getTimestamp("occurred_at").toInstant(),
@@ -78,7 +80,7 @@ public class OutboxRepository {
     }
 
     public record OutboxEvent(UUID id, String aggregateType, UUID aggregateId,
-                              String eventType, String payload, Instant occurredAt,
-                              Instant createdAt, Instant publishedAt, int attempts,
-                              String lastError) { }
+                              Long sequenceNo, String eventType, String payload,
+                              Instant occurredAt, Instant createdAt, Instant publishedAt,
+                              int attempts, String lastError) { }
 }
