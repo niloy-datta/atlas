@@ -93,10 +93,7 @@ export default function WorkforcePage() {
   }, [firebaseUser, authLoading, router]);
 
   useEffect(() => {
-    if (!organizationId || !selectedPoolId) {
-      setMembers([]);
-      return;
-    }
+    if (!organizationId || !selectedPoolId) return;
     listWorkforcePoolMembers(organizationId, selectedPoolId)
       .then(setMembers)
       .catch((err: unknown) => setError(err instanceof Error ? err.message : "Failed to load pool members."));
@@ -260,7 +257,10 @@ export default function WorkforcePage() {
                   <h2 className="text-lg font-bold text-white">Pool members</h2>
                   <select
                     value={selectedPoolId}
-                    onChange={(e) => setSelectedPoolId(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedPoolId(e.target.value);
+                      if (!e.target.value) setMembers([]);
+                    }}
                     className="mt-4 w-full rounded-xl border border-slate-700 bg-[#080d1a] px-3 py-2 text-sm"
                   >
                     <option value="">Select a pool</option>
