@@ -2,6 +2,7 @@ package com.atlas.search.domain;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Collections;
 
 public record ProjectionDocument(String id, Map<String, Object> source) {
     public static ProjectionDocument worker(
@@ -24,7 +25,7 @@ public record ProjectionDocument(String id, Map<String, Object> source) {
             location.put("countryCode", countryCode);
             source.put("coarseLocation", location);
         }
-        return new ProjectionDocument(id, Map.copyOf(source));
+        return new ProjectionDocument(id, Collections.unmodifiableMap(new LinkedHashMap<>(source)));
     }
 
     public static ProjectionDocument job(String id, String organizationName, String title,
@@ -40,7 +41,7 @@ public record ProjectionDocument(String id, Map<String, Object> source) {
         source.put("budgetMinPence", budgetMinPence);
         source.put("budgetMaxPence", budgetMaxPence);
         source.put("currency", currency);
-        return new ProjectionDocument(id, Map.copyOf(source));
+        return new ProjectionDocument(id, Collections.unmodifiableMap(new LinkedHashMap<>(source)));
     }
 
     public static ProjectionDocument shift(String id, String organizationName, String title,
@@ -57,6 +58,6 @@ public record ProjectionDocument(String id, Map<String, Object> source) {
         source.put("currency", currency);
         source.put("startTime", startTime);
         source.put("endTime", endTime);
-        return new ProjectionDocument(id, Map.copyOf(source));
+        return new ProjectionDocument(id, Collections.unmodifiableMap(new LinkedHashMap<>(source)));
     }
 }
