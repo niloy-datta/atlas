@@ -139,24 +139,17 @@ class ReservationIntegrationTests {
         return shiftId;
     }
 
-    private UUID createWorker() {
-        String email = "reservation-" + UUID.randomUUID() + "@example.test";
-        UUID userId = UUID.randomUUID();
+    private UUID createWorker() throws Exception {
+        Auth worker = bootstrap("worker");
         UUID profileId = UUID.randomUUID();
-        jdbc.update("""
-                INSERT INTO users
-                    (id, email_normalized, email_display, display_name, account_type,
-                     status, created_at, updated_at)
-                VALUES (?, ?, ?, 'Reservation Worker', 'WORKER', 'ACTIVE', now(), now())
-                """, userId, email, email);
         jdbc.update("""
                 INSERT INTO worker_profiles
                     (id, user_id, public_handle, full_name, headline, bio, experience_years,
                      visibility, completion_score, completion_version, version, created_at, updated_at)
                 VALUES (?, ?, ?, 'Reservation Worker', 'Worker', 'Reservation test', 2,
                         'PRIVATE', 50, 1, 0, now(), now())
-                """, profileId, userId, "reserve-" + profileId.toString().substring(0, 8));
-        return userId;
+                """, profileId, worker.id(), "reserve-" + profileId.toString().substring(0, 8));
+        return worker.id();
     }
 
     private UUID createOrganization(Auth auth) throws Exception {
