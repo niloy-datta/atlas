@@ -36,10 +36,10 @@ class OutboxIntegrationTests {
         Integer events = jdbc.queryForObject("""
                 SELECT count(*) FROM outbox_events
                  WHERE aggregate_type = 'WORK_LEDGER'
-                   AND aggregate_id = ?
+                   AND payload ->> 'ledgerEntryId' = ?
                    AND event_type = 'workledger.reservation_confirmed.v1'
                    AND published_at IS NULL
-                """, Integer.class, entry.id());
+                """, Integer.class, entry.id().toString());
 
         assertThat(events).isEqualTo(1);
     }
