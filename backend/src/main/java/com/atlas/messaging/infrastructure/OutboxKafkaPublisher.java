@@ -1,6 +1,7 @@
 package com.atlas.messaging.infrastructure;
 
 import com.atlas.messaging.domain.DomainEventEnvelope;
+import com.atlas.observability.AtlasOperationalMetrics;
 import com.atlas.outbox.infrastructure.OutboxRepository;
 import java.time.Clock;
 import java.time.Instant;
@@ -21,16 +22,19 @@ public class OutboxKafkaPublisher {
     private final ObjectMapper json;
     private final Clock clock;
     private final String topic;
+    private final AtlasOperationalMetrics metrics;
 
     public OutboxKafkaPublisher(OutboxRepository outbox,
                                 KafkaTemplate<String, String> kafka,
                                 ObjectMapper json,
                                 Clock clock,
+                                AtlasOperationalMetrics metrics,
                                 @Value("${atlas.kafka.topic}") String topic) {
         this.outbox = outbox;
         this.kafka = kafka;
         this.json = json;
         this.clock = clock;
+        this.metrics = metrics;
         this.topic = topic;
     }
 
@@ -52,8 +56,10 @@ public class OutboxKafkaPublisher {
                         .get(10, TimeUnit.SECONDS);
 
                 outbox.markPublished(event.id(), Instant.now(clock));
+                metrics.kafkaPublished();
             } catch (Exception exception) {
                 outbox.markFailed(event.id(), truncate(rootMessage(exception)));
+                metrics.kafkaFailed();
             }
         }
     }

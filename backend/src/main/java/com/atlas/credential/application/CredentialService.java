@@ -12,6 +12,7 @@ import com.atlas.credential.storage.CredentialStorage;
 import com.atlas.credential.storage.CredentialStorageException;
 import com.atlas.identity.application.IdentityReadService;
 import com.atlas.shared.error.ApiProblemException;
+import com.atlas.observability.AtlasOperationalMetrics;
 import java.net.URI;
 import java.time.Clock;
 import java.time.Instant;
@@ -32,16 +33,19 @@ public class CredentialService {
     private final MalwareScanner malwareScanner;
     private final IdentityReadService identities;
     private final Clock clock;
+    private final AtlasOperationalMetrics metrics;
 
     public CredentialService(CredentialRepository credentials, CredentialStorage storage,
                              CredentialStorageProperties properties, MalwareScanner malwareScanner,
-                             IdentityReadService identities, Clock clock) {
+                             IdentityReadService identities, Clock clock,
+                             AtlasOperationalMetrics metrics) {
         this.credentials = credentials;
         this.storage = storage;
         this.properties = properties;
         this.malwareScanner = malwareScanner;
         this.identities = identities;
         this.clock = clock;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -144,6 +148,8 @@ public class CredentialService {
                         "SCANNER_EXCEPTION",
                         exception.getClass().getSimpleName() + ": " + safeDetail(exception.getMessage()));
             }
+
+            metrics.malwareScan(outcome.result().name());
 
             if (CredentialScanPolicy.decide(outcome) == CredentialScanPolicy.Decision.ACCEPT) {
                 credentials.addScanEvent(document.id(), outcome.engine(), outcome.result().name(),
