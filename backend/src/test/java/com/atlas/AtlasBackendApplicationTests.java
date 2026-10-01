@@ -3,6 +3,7 @@ package com.atlas;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ class AtlasBackendApplicationTests {
 	void safeSystemMetadataAndHealthArePublic() throws Exception {
 		mockMvc.perform(get("/api/v1/system/info"))
 				.andExpect(status().isOk())
+				.andExpect(header().exists("X-Request-ID"))
 				.andExpect(jsonPath("$.service").value("atlas-backend"))
 				.andExpect(jsonPath("$.apiVersion").value("v1"))
 				.andExpect(jsonPath("$.status").value("UP"));
