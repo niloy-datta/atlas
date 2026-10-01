@@ -50,15 +50,8 @@ public class ReservationController {
                           @PathVariable UUID reservationId,
                           @AuthenticationPrincipal AtlasPrincipal principal,
                           @Valid @RequestBody CancelRequest request) {
-        ReservationRow row = reservations.cancel(
-                organizationId, reservationId, principal.requireUserId(), request.version());
-        if (!row.shiftId().equals(shiftId)) {
-            throw new com.atlas.shared.error.ApiProblemException(
-                    org.springframework.http.HttpStatus.NOT_FOUND,
-                    "RESERVATION_NOT_FOUND", "Reservation not found",
-                    "The requested reservation does not belong to this shift.");
-        }
-        return row;
+        return reservations.cancel(organizationId, shiftId, reservationId,
+                principal.requireUserId(), request.version());
     }
 
     public record ReservationRequest(@NotNull UUID workerId) { }
