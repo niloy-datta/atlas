@@ -6,6 +6,7 @@ import com.atlas.reservation.infrastructure.ReservationRepository;
 import com.atlas.reservation.infrastructure.ReservationRepository.LockedShift;
 import com.atlas.reservation.infrastructure.ReservationRepository.ReservationRow;
 import com.atlas.shared.error.ApiProblemException;
+import com.atlas.workledger.application.WorkLedgerService;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -20,13 +21,16 @@ public class ReservationService {
     private final ReservationRepository reservations;
     private final OrganizationAccessPolicy access;
     private final Clock clock;
+    private final WorkLedgerService workLedger;
 
     public ReservationService(ReservationRepository reservations,
                               OrganizationAccessPolicy access,
-                              Clock clock) {
+                              Clock clock,
+                              WorkLedgerService workLedger) {
         this.reservations = reservations;
         this.access = access;
         this.clock = clock;
+        this.workLedger = workLedger;
     }
 
     @Transactional
@@ -54,6 +58,7 @@ public class ReservationService {
         } catch (DataIntegrityViolationException exception) {
             throw duplicateReservation();
         }
+        workLedger.record(workerUserId, organizationId, shiftId, row.id(), "RESERVATION_CONFIRMED");
         return row;
     }
 
@@ -76,8 +81,11 @@ public class ReservationService {
             throw conflict("RESERVATION_VERSION_CONFLICT", "Reservation changed",
                     "Reload the reservation and retry with its current version.");
         }
-        return reservations.find(organizationId, shiftId, reservationId)
+        ReservationRow cancelled = reservations.find(organizationId, shiftId, reservationId)
                 .orElseThrow(ReservationService::reservationNotFound);
+        workLedger.record(cancelled.workerUserId(), organizationId, shiftId,
+                reservationId, "RESERVATION_CANCELLED");
+        return cancelled;
     }
 
     private static ApiProblemException shiftNotFound() {
