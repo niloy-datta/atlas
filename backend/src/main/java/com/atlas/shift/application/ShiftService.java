@@ -5,6 +5,8 @@ import com.atlas.job.infrastructure.JobRepository;
 import com.atlas.organization.application.OrganizationAccessPolicy;
 import com.atlas.organization.domain.OrganizationAction;
 import com.atlas.shared.error.ApiProblemException;
+import com.atlas.reservation.infrastructure.ReservationRepository;
+import com.atlas.workledger.application.WorkLedgerService;
 import com.atlas.shift.domain.ShiftCredentialRequirement;
 import com.atlas.shift.domain.ShiftDetailView;
 import com.atlas.shift.domain.ShiftRow;
@@ -26,13 +28,19 @@ public class ShiftService {
     private final ShiftRepository shiftRepository;
     private final JobRepository jobRepository;
     private final OrganizationAccessPolicy organizationAccessPolicy;
+    private final ReservationRepository reservationRepository;
+    private final WorkLedgerService workLedger;
 
     public ShiftService(ShiftRepository shiftRepository,
                         JobRepository jobRepository,
-                        OrganizationAccessPolicy organizationAccessPolicy) {
+                        OrganizationAccessPolicy organizationAccessPolicy,
+                        ReservationRepository reservationRepository,
+                        WorkLedgerService workLedger) {
         this.shiftRepository = shiftRepository;
         this.jobRepository = jobRepository;
         this.organizationAccessPolicy = organizationAccessPolicy;
+        this.reservationRepository = reservationRepository;
+        this.workLedger = workLedger;
     }
 
     @Transactional
@@ -160,7 +168,13 @@ public class ShiftService {
 
     @Transactional
     public ShiftDetailView completeShift(UUID organizationId, UUID shiftId, long version, UUID actorUserId) {
-        return transitionStatus(organizationId, shiftId, ShiftStatus.COMPLETED, version, actorUserId);
+        ShiftDetailView completed = transitionStatus(
+                organizationId, shiftId, ShiftStatus.COMPLETED, version, actorUserId);
+        reservationRepository.list(organizationId, shiftId).stream()
+                .filter(row -> "CONFIRMED".equals(row.status()))
+                .forEach(row -> workLedger.record(row.workerUserId(), organizationId,
+                        shiftId, row.id(), "SHIFT_COMPLETED"));
+        return completed;
     }
 
     @Transactional
