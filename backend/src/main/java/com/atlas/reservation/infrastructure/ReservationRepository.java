@@ -48,9 +48,9 @@ public class ReservationRepository {
     }
 
     public boolean workerExists(UUID workerUserId) {
-        Integer count = jdbc.queryForObject("""
-                SELECT count(*) FROM worker_profiles WHERE user_id = ?
-                """, Integer.class, workerUserId);
+        Integer count = jdbc.queryForObject(
+                "SELECT count(*) FROM worker_profiles WHERE user_id = ?",
+                Integer.class, workerUserId);
         return count != null && count > 0;
     }
 
@@ -80,16 +80,18 @@ public class ReservationRepository {
                 SELECT id, shift_id, organization_id, worker_user_id, status, version,
                        created_by_user_id, created_at, updated_at
                   FROM shift_reservations
-                 WHERE organization_id = ? AND id = ?
-                """, (rs, n) -> map(rs), organizationId, reservationId).stream().findFirst();
+                 WHERE organization_id = ? AND shift_id = ? AND id = ?
+                """, (rs, n) -> map(rs), organizationId, shiftId, reservationId).stream().findFirst();
     }
 
-    public int cancel(UUID organizationId, UUID shiftId, UUID reservationId, long version, Instant now) {
+    public int cancel(UUID organizationId, UUID shiftId, UUID reservationId,
+                      long version, Instant now) {
         return jdbc.update("""
                 UPDATE shift_reservations
                    SET status = 'CANCELLED', version = version + 1, updated_at = ?
-                 WHERE organization_id = ? AND id = ? AND status = 'CONFIRMED' AND version = ?
-                """, Timestamp.from(now), organizationId, reservationId, version);
+                 WHERE organization_id = ? AND shift_id = ? AND id = ?
+                   AND status = 'CONFIRMED' AND version = ?
+                """, Timestamp.from(now), organizationId, shiftId, reservationId, version);
     }
 
     private static ReservationRow map(ResultSet rs) throws SQLException {
