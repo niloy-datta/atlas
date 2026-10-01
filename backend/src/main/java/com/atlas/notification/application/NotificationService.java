@@ -2,6 +2,7 @@ package com.atlas.notification.application;
 
 import com.atlas.notification.infrastructure.NotificationRepository;
 import com.atlas.notification.infrastructure.NotificationRepository.NotificationRow;
+import com.atlas.observability.AtlasOperationalMetrics;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -17,13 +18,16 @@ public class NotificationService {
     private final NotificationRepository notifications;
     private final NotificationStreamRegistry streams;
     private final Clock clock;
+    private final AtlasOperationalMetrics metrics;
 
     public NotificationService(NotificationRepository notifications,
                                NotificationStreamRegistry streams,
-                               Clock clock) {
+                               Clock clock,
+                               AtlasOperationalMetrics metrics) {
         this.notifications = notifications;
         this.streams = streams;
         this.clock = clock;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -33,7 +37,10 @@ public class NotificationService {
                 UUID.randomUUID(), userId, sourceEventId, eventType,
                 title, body, Instant.now(clock)).orElse(null);
 
-        if (row != null) publishAfterCommit(row);
+        if (row != null) {
+            metrics.notificationCreated();
+            publishAfterCommit(row);
+        }
         return row;
     }
 
