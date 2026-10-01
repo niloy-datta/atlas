@@ -101,6 +101,17 @@ server:
     include-stacktrace: never
 
 management:
+  tracing:
+    sampling:
+      probability: ${ATLAS_TRACE_SAMPLE_PROBABILITY:0.1}
+    export:
+      otlp:
+        enabled: ${ATLAS_OTLP_EXPORT_ENABLED:false}
+  opentelemetry:
+    enabled: ${ATLAS_OTEL_ENABLED:true}
+    resource-attributes:
+      service.name: atlas-backend
+      service.version: 0.0.1-SNAPSHOT
   endpoints:
     web:
       exposure:
@@ -119,3 +130,8 @@ info:
     name: ATLAS Backend
     version: 0.0.1-SNAPSHOT
     api-version: v1
+
+logging:
+  structured:
+    format:
+      console: ${ATLAS_STRUCTURED_LOG_FORMAT:logstash}
