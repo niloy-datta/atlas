@@ -7,13 +7,16 @@ import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.Http.Method;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
 import jakarta.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
+import java.util.UUID;
 
 public class MinioCredentialStorage implements CredentialStorage {
     private final MinioClient client;
@@ -71,6 +74,41 @@ public class MinioCredentialStorage implements CredentialStorage {
             return new StoredObject(size, prefix);
         } catch (Exception exception) {
             throw storageFailure("Credential object inspection failed.", exception);
+        }
+    }
+
+    @Override
+    public byte[] readAll(String objectKey, long maximumBytes) {
+        try (InputStream stream = client.getObject(GetObjectArgs.builder()
+                .bucket(properties.bucket()).object(objectKey).build())) {
+            int limit = Math.toIntExact(Math.min(Integer.MAX_VALUE - 1L, maximumBytes + 1L));
+            byte[] content = stream.readNBytes(limit);
+            if (content.length > maximumBytes) {
+                throw new CredentialStorageException("Credential object exceeds configured scan limit.");
+            }
+            return content;
+        } catch (CredentialStorageException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw storageFailure("Credential object read failed.", exception);
+        }
+    }
+
+    @Override
+    public String quarantine(String objectKey, byte[] content) {
+        String quarantineKey = "quarantine/" + UUID.randomUUID();
+        try (ByteArrayInputStream stream = new ByteArrayInputStream(content)) {
+            client.putObject(PutObjectArgs.builder()
+                    .bucket(properties.bucket())
+                    .object(quarantineKey)
+                    .stream(stream, content.length, -1)
+                    .contentType("application/octet-stream")
+                    .build());
+            client.removeObject(RemoveObjectArgs.builder()
+                    .bucket(properties.bucket()).object(objectKey).build());
+            return quarantineKey;
+        } catch (Exception exception) {
+            throw storageFailure("Credential quarantine operation failed.", exception);
         }
     }
 
