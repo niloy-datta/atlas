@@ -5,6 +5,7 @@ import com.atlas.job.infrastructure.JobRepository;
 import com.atlas.organization.application.OrganizationAccessPolicy;
 import com.atlas.organization.domain.OrganizationAction;
 import com.atlas.shared.error.ApiProblemException;
+import com.atlas.shared.cache.ResilientRedisCache;
 import com.atlas.reservation.infrastructure.ReservationRepository;
 import com.atlas.workledger.application.WorkLedgerService;
 import com.atlas.shift.domain.ShiftCredentialRequirement;
@@ -16,6 +17,7 @@ import com.atlas.shift.domain.ShiftSummaryView;
 import com.atlas.shift.infrastructure.ShiftRepository;
 import com.atlas.skill.domain.SkillProficiency;
 import java.time.Instant;
+import java.time.Duration;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
@@ -30,17 +32,20 @@ public class ShiftService {
     private final OrganizationAccessPolicy organizationAccessPolicy;
     private final ReservationRepository reservationRepository;
     private final WorkLedgerService workLedger;
+    private final ResilientRedisCache cache;
 
     public ShiftService(ShiftRepository shiftRepository,
                         JobRepository jobRepository,
                         OrganizationAccessPolicy organizationAccessPolicy,
                         ReservationRepository reservationRepository,
-                        WorkLedgerService workLedger) {
+                        WorkLedgerService workLedger,
+                        ResilientRedisCache cache) {
         this.shiftRepository = shiftRepository;
         this.jobRepository = jobRepository;
         this.organizationAccessPolicy = organizationAccessPolicy;
         this.reservationRepository = reservationRepository;
         this.workLedger = workLedger;
+        this.cache = cache;
     }
 
     @Transactional
@@ -138,6 +143,7 @@ public class ShiftService {
                     "Concurrent modification", "The shift was modified concurrently. Please refresh and retry.");
         }
 
+        evictPublicShift(shiftId);
         return shiftRepository.findDetailById(shiftId).orElseThrow(() -> notFound(shiftId));
     }
 
@@ -196,6 +202,7 @@ public class ShiftService {
 
         UUID reqId = UUID.randomUUID();
         shiftRepository.addRequiredSkill(reqId, shiftId, cmd.skillId(), cmd.minimumProficiency(), cmd.required(), Instant.now());
+        evictPublicShift(shiftId);
         return shiftRepository.findDetailById(shiftId).orElseThrow(() -> notFound(shiftId));
     }
 
@@ -212,6 +219,7 @@ public class ShiftService {
         }
 
         shiftRepository.removeRequiredSkill(shiftId, skillId);
+        evictPublicShift(shiftId);
         return shiftRepository.findDetailById(shiftId).orElseThrow(() -> notFound(shiftId));
     }
 
@@ -239,6 +247,7 @@ public class ShiftService {
         UUID reqId = UUID.randomUUID();
         shiftRepository.addRequiredCredential(reqId, shiftId, credType, cmd.title().trim(),
                 cmd.issuer() != null ? cmd.issuer().trim() : null, cmd.required(), Instant.now());
+        evictPublicShift(shiftId);
         return shiftRepository.findDetailById(shiftId).orElseThrow(() -> notFound(shiftId));
     }
 
@@ -255,6 +264,7 @@ public class ShiftService {
         }
 
         shiftRepository.removeRequiredCredential(shiftId, credentialRequirementId);
+        evictPublicShift(shiftId);
         return shiftRepository.findDetailById(shiftId).orElseThrow(() -> notFound(shiftId));
     }
 
@@ -281,13 +291,14 @@ public class ShiftService {
 
     @Transactional(readOnly = true)
     public ShiftDetailView getPublicShift(UUID shiftId) {
-        ShiftDetailView shift = shiftRepository.findDetailById(shiftId)
-                .orElseThrow(() -> notFound(shiftId));
-
-        if (shift.status() != ShiftStatus.PUBLISHED && shift.status() != ShiftStatus.IN_PROGRESS) {
-            throw notFound(shiftId);
-        }
-        return shift;
+        return cache.getOrLoad(publicShiftKey(shiftId), Duration.ofMinutes(1), ShiftDetailView.class, () -> {
+            ShiftDetailView shift = shiftRepository.findDetailById(shiftId)
+                    .orElseThrow(() -> notFound(shiftId));
+            if (shift.status() != ShiftStatus.PUBLISHED && shift.status() != ShiftStatus.IN_PROGRESS) {
+                throw notFound(shiftId);
+            }
+            return shift;
+        });
     }
 
     @Transactional(readOnly = true)
@@ -329,6 +340,7 @@ public class ShiftService {
                     "Concurrent modification", "The shift was modified concurrently. Please refresh and retry.");
         }
 
+        evictPublicShift(shiftId);
         return shiftRepository.findDetailById(shiftId).orElseThrow(() -> notFound(shiftId));
     }
 
@@ -385,6 +397,14 @@ public class ShiftService {
             throw new ApiProblemException(HttpStatus.BAD_REQUEST, "INVALID_COORDINATES",
                     "Invalid coordinates", "Latitude must be [-90, 90] and longitude must be [-180, 180].");
         }
+    }
+
+    private void evictPublicShift(UUID shiftId) {
+        cache.evict(publicShiftKey(shiftId));
+    }
+
+    private static String publicShiftKey(UUID shiftId) {
+        return "atlas:public:shift:" + shiftId;
     }
 
     private static ApiProblemException notFound(UUID shiftId) {
