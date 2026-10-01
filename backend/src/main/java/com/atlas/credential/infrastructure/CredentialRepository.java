@@ -104,6 +104,18 @@ public class CredentialRepository {
                 Timestamp.from(now), documentId);
     }
 
+    public void addScanEvent(UUID documentId, String engine, String result,
+                             String detail, long scannedBytes,
+                             String quarantinedObjectKey, Instant now) {
+        jdbc.update("""
+                INSERT INTO credential_scan_events
+                    (id, document_id, engine, result, detail, scanned_bytes,
+                     quarantined_object_key, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, UUID.randomUUID(), documentId, engine, result, detail,
+                scannedBytes, quarantinedObjectKey, Timestamp.from(now));
+    }
+
     public int cleanDocumentCount(UUID credentialId) {
         return jdbc.queryForObject("""
                 SELECT count(*) FROM credential_document_objects
