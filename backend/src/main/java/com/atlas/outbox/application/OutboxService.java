@@ -22,9 +22,15 @@ public class OutboxService {
     @Transactional
     public OutboxEvent append(String aggregateType, UUID aggregateId,
                               String eventType, String payloadJson, Instant occurredAt) {
+        return append(aggregateType, aggregateId, null, eventType, payloadJson, occurredAt);
+    }
+
+    @Transactional
+    public OutboxEvent append(String aggregateType, UUID aggregateId, Long sequenceNo,
+                              String eventType, String payloadJson, Instant occurredAt) {
         Instant now = Instant.now(clock);
         OutboxEvent event = new OutboxEvent(
-                UUID.randomUUID(), aggregateType, aggregateId, eventType,
+                UUID.randomUUID(), aggregateType, aggregateId, sequenceNo, eventType,
                 payloadJson, occurredAt, now, null, 0, null);
         repository.append(event);
         return event;
