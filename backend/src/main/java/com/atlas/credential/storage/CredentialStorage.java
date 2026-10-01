@@ -7,6 +7,8 @@ public interface CredentialStorage {
     URI createUploadUrl(String objectKey, String contentType, Duration lifetime);
     URI createDownloadUrl(String objectKey, Duration lifetime);
     StoredObject inspect(String objectKey, int prefixLength);
+    byte[] readAll(String objectKey, long maximumBytes);
+    String quarantine(String objectKey, byte[] content);
     void delete(String objectKey);
 
     record StoredObject(long sizeBytes, byte[] prefix) { }
