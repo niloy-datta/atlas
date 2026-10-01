@@ -73,6 +73,10 @@ atlas:
     topic: ${ATLAS_KAFKA_TOPIC:atlas.domain-events.v1}
     consumer-group: ${ATLAS_KAFKA_CONSUMER_GROUP:atlas-core-v1}
     publish-delay-ms: ${ATLAS_KAFKA_PUBLISH_DELAY_MS:1000}
+  opensearch:
+    enabled: ${ATLAS_OPENSEARCH_ENABLED:false}
+    endpoint: ${ATLAS_OPENSEARCH_ENDPOINT:http://localhost:9200}
+    index: ${ATLAS_OPENSEARCH_INDEX:atlas-public-v1}
   credential-storage:
     enabled: ${ATLAS_CREDENTIAL_STORAGE_ENABLED:true}
     endpoint: ${ATLAS_MINIO_ENDPOINT:http://localhost:9000}
