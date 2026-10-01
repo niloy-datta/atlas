@@ -11,8 +11,10 @@ import com.atlas.job.infrastructure.JobRepository;
 import com.atlas.organization.application.OrganizationAccessPolicy;
 import com.atlas.organization.domain.OrganizationAction;
 import com.atlas.shared.error.ApiProblemException;
+import com.atlas.shared.cache.ResilientRedisCache;
 import com.atlas.skill.domain.SkillProficiency;
 import java.time.Instant;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -24,10 +26,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class JobService {
     private final JobRepository jobRepository;
     private final OrganizationAccessPolicy organizationAccessPolicy;
+    private final ResilientRedisCache cache;
 
-    public JobService(JobRepository jobRepository, OrganizationAccessPolicy organizationAccessPolicy) {
+    public JobService(JobRepository jobRepository,
+                      OrganizationAccessPolicy organizationAccessPolicy,
+                      ResilientRedisCache cache) {
         this.jobRepository = jobRepository;
         this.organizationAccessPolicy = organizationAccessPolicy;
+        this.cache = cache;
     }
 
     @Transactional
@@ -103,6 +109,7 @@ public class JobService {
                     "Concurrent modification", "The job was modified concurrently. Please refresh and retry.");
         }
 
+        evictPublicJob(jobId);
         return jobRepository.findDetailById(jobId).orElseThrow(() -> notFound(jobId));
     }
 
@@ -145,6 +152,7 @@ public class JobService {
 
         UUID reqId = UUID.randomUUID();
         jobRepository.addRequiredSkill(reqId, jobId, cmd.skillId(), cmd.minimumProficiency(), cmd.required(), Instant.now());
+        evictPublicJob(jobId);
         return jobRepository.findDetailById(jobId).orElseThrow(() -> notFound(jobId));
     }
 
@@ -161,6 +169,7 @@ public class JobService {
         }
 
         jobRepository.removeRequiredSkill(jobId, skillId);
+        evictPublicJob(jobId);
         return jobRepository.findDetailById(jobId).orElseThrow(() -> notFound(jobId));
     }
 
@@ -188,6 +197,7 @@ public class JobService {
         UUID reqId = UUID.randomUUID();
         jobRepository.addRequiredCredential(reqId, jobId, credType, cmd.title().trim(),
                 cmd.issuer() != null ? cmd.issuer().trim() : null, cmd.required(), Instant.now());
+        evictPublicJob(jobId);
         return jobRepository.findDetailById(jobId).orElseThrow(() -> notFound(jobId));
     }
 
@@ -204,6 +214,7 @@ public class JobService {
         }
 
         jobRepository.removeRequiredCredential(jobId, credentialRequirementId);
+        evictPublicJob(jobId);
         return jobRepository.findDetailById(jobId).orElseThrow(() -> notFound(jobId));
     }
 
@@ -229,13 +240,12 @@ public class JobService {
 
     @Transactional(readOnly = true)
     public JobDetailView getPublicJob(UUID jobId) {
-        JobDetailView job = jobRepository.findDetailById(jobId)
-                .orElseThrow(() -> notFound(jobId));
-
-        if (job.status() != JobStatus.PUBLISHED) {
-            throw notFound(jobId);
-        }
-        return job;
+        return cache.getOrLoad(publicJobKey(jobId), Duration.ofMinutes(2), JobDetailView.class, () -> {
+            JobDetailView job = jobRepository.findDetailById(jobId)
+                    .orElseThrow(() -> notFound(jobId));
+            if (job.status() != JobStatus.PUBLISHED) throw notFound(jobId);
+            return job;
+        });
     }
 
     @Transactional(readOnly = true)
@@ -275,6 +285,7 @@ public class JobService {
                     "Concurrent modification", "The job was modified concurrently. Please refresh and retry.");
         }
 
+        evictPublicJob(jobId);
         return jobRepository.findDetailById(jobId).orElseThrow(() -> notFound(jobId));
     }
 
@@ -312,6 +323,14 @@ public class JobService {
             throw new ApiProblemException(HttpStatus.BAD_REQUEST, "INVALID_CURRENCY",
                     "Invalid currency", "Currency must be a 3-letter ISO code.");
         }
+    }
+
+    private void evictPublicJob(UUID jobId) {
+        cache.evict(publicJobKey(jobId));
+    }
+
+    private static String publicJobKey(UUID jobId) {
+        return "atlas:public:job:" + jobId;
     }
 
     private static ApiProblemException notFound(UUID jobId) {
