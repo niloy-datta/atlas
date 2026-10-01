@@ -72,7 +72,7 @@ class IdempotencyIntegrationTests {
                 () -> reservations.reserve(fixture.organizationId(), fixture.shiftId(),
                         fixture.actorId(), otherWorker)))
                 .isInstanceOf(ApiProblemException.class)
-                .hasMessageContaining("Idempotency key reused");
+                .hasMessageContaining("different request payload");
 
         assertThat(activeReservations(fixture.shiftId())).isEqualTo(1);
     }
