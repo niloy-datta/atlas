@@ -15,7 +15,8 @@ License: MIT
 | **Applications Domain** | `PRODUCTION-READY` | Phase 9 completed. Unified polymorphic applications (Jobs & Shifts), state machine (`SUBMITTED -> REVIEWING -> SHORTLISTED -> ACCEPTED / REJECTED / WITHDRAWN`), database-enforced integrity (`V11`), optimistic locking. |
 | **Invitations Domain** | `PRODUCTION-READY` | Phase 9 completed. Direct organization-to-worker invitations for jobs/shifts, automatic TTL expiration, acceptance/decline flow, database-enforced candidate targets. |
 | **Database & Invariants** | `HARDENED` | PostgreSQL 18 + PostGIS 3.6. Flyway migrations up to `V12__workforce_pools.sql`. Composite foreign keys, cross-tenant isolation, XOR check constraints (`job_id` vs `shift_id`). |
-| **Workforce Pools** | `IMPLEMENTED` | Phase 10 reusable organization-scoped worker pools, membership management, duplicate protection, tenant-safe composite foreign keys, and optimistic pool updates. |\n| **Frontend Applications** | `PRODUCTION-READY` | Next.js 16 App Router, React 19, Tailwind CSS. Integrated apply modals, worker invitation & application pipelines, employer applicant management dashboard. |
+| **Workforce Pools** | `IMPLEMENTED` | Phase 10 reusable organization-scoped worker pools, membership management, duplicate protection, tenant-safe composite foreign keys, and optimistic pool updates. |
+| **Frontend Applications** | `PRODUCTION-READY` | Next.js 16 App Router, React 19, Tailwind CSS. Integrated apply modals, worker invitation & application pipelines, employer applicant management dashboard. |
 | **CI / CD Automation** | `ACTIVE` | GitHub Actions CI workflow (`.github/workflows/ci.yml`) testing backend (Maven wrapper, JUnit 5) and frontend (lint, TypeScript check, Vitest 17 unit tests, Next.js production build). Automated GitHub Pages deployment (`.github/workflows/deploy-pages.yml`). |
 | **Verification Tooling** | `HARDENED` | Cross-platform `scripts/verify.ps1` runs native Maven & npm test suites without WSL path dependencies. |
 
@@ -23,4 +24,5 @@ License: MIT
 
 - **Phase 0–6**: Platform foundation, identity boundary, private/public WorkPass, tenant-isolated organizations, SkillProof, and secure credentials.
 - **Phase 7–8**: Jobs domain, flexible shifts domain, supervisor assignment, time slots.
-- **Phase 9**: Application & Invitation transactional core, candidate key hardening (`V11`), employer pipeline, worker pipeline, and CI/CD automation.\n- **Phase 10**: Workforce Pools with reusable worker membership, tenant isolation, duplicate protection, and integration tests.
+- **Phase 9**: Application & Invitation transactional core, candidate key hardening (`V11`), employer pipeline, worker pipeline, and CI/CD automation.
+- **Phase 10**: Workforce Pools with reusable worker membership, tenant isolation, duplicate protection, and integration tests.
