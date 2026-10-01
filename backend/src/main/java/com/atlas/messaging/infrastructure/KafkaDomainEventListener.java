@@ -2,6 +2,7 @@ package com.atlas.messaging.infrastructure;
 
 import com.atlas.messaging.application.ConsumerEventProcessor;
 import com.atlas.messaging.domain.DomainEventEnvelope;
+import com.atlas.notification.application.NotificationEventHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,12 +16,15 @@ public class KafkaDomainEventListener {
     private final ConsumerEventProcessor processor;
     private final ObjectMapper json;
     private final String consumerName;
+    private final NotificationEventHandler notifications;
 
     public KafkaDomainEventListener(ConsumerEventProcessor processor,
                                     ObjectMapper json,
+                                    NotificationEventHandler notifications,
                                     @Value("${atlas.kafka.consumer-group}") String consumerName) {
         this.processor = processor;
         this.json = json;
+        this.notifications = notifications;
         this.consumerName = consumerName;
     }
 
@@ -35,9 +39,6 @@ public class KafkaDomainEventListener {
             throw new IllegalArgumentException("Kafka domain event envelope is invalid JSON", exception);
         }
 
-        processor.process(consumerName, envelope, ignored -> {
-            // Phase 20 establishes the durable idempotent consumption boundary.
-            // Phase 21 attaches the notification projection inside this transaction.
-        });
+        processor.process(consumerName, envelope, notifications::handle);
     }
 }
