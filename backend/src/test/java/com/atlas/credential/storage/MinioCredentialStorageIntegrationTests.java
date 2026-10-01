@@ -25,7 +25,7 @@ class MinioCredentialStorageIntegrationTests {
 
     @Container
     private static final GenericContainer<?> MINIO = new GenericContainer<>(DockerImageName.parse(
-            "quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z"))
+            "minio/minio:RELEASE.2025-06-13T11-33-47Z"))
             .withEnv("MINIO_ROOT_USER", ACCESS_KEY)
             .withEnv("MINIO_ROOT_PASSWORD", SECRET_KEY)
             .withCommand("server", "/data")
