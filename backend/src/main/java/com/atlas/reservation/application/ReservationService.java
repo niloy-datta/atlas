@@ -43,8 +43,7 @@ public class ReservationService {
         if (!reservations.workerExists(workerUserId)) throw workerNotFound();
         if (reservations.activeExists(shiftId, workerUserId)) throw duplicateReservation();
 
-        int active = reservations.activeCount(shiftId);
-        if (active >= shift.capacity()) throw capacityReached();
+        if (reservations.activeCount(shiftId) >= shift.capacity()) throw capacityReached();
 
         Instant now = Instant.now(clock);
         ReservationRow row = new ReservationRow(
@@ -65,13 +64,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationRow cancel(UUID organizationId, UUID reservationId,
+    public ReservationRow cancel(UUID organizationId, UUID shiftId, UUID reservationId,
                                  UUID actorId, long version) {
         access.require(organizationId, actorId, OrganizationAction.MANAGE_WORKFORCE);
         ReservationRow existing = reservations.find(organizationId, shiftId, reservationId)
                 .orElseThrow(ReservationService::reservationNotFound);
         if (!"CONFIRMED".equals(existing.status())) throw reservationNotFound();
-        if (reservations.cancel(organizationId, shiftId, reservationId, version, Instant.now(clock)) == 0) {
+
+        if (reservations.cancel(organizationId, shiftId, reservationId,
+                version, Instant.now(clock)) == 0) {
             throw conflict("RESERVATION_VERSION_CONFLICT", "Reservation changed",
                     "Reload the reservation and retry with its current version.");
         }
