@@ -56,9 +56,26 @@ public class TestcontainersConfiguration {
 		}
 
 		@Override
+		public byte[] readAll(String objectKey, long maximumBytes) {
+			byte[] value = objects.get(objectKey);
+			if (value == null) throw new CredentialStorageException("Object not found", new IllegalStateException());
+			if (value.length > maximumBytes) throw new CredentialStorageException("Object too large", new IllegalStateException("scan limit exceeded"));
+			return value.clone();
+		}
+
+		@Override
+		public String quarantine(String objectKey, byte[] content) {
+			String quarantineKey = "quarantine/" + UUID.randomUUID();
+			objects.put(quarantineKey, content.clone());
+			objects.remove(objectKey);
+			return quarantineKey;
+		}
+
+		@Override
 		public void delete(String objectKey) { objects.remove(objectKey); }
 
 		public void put(String objectKey, byte[] value) { objects.put(objectKey, value.clone()); }
+		public boolean contains(String objectKey) { return objects.containsKey(objectKey); }
 	}
 
 	@Bean

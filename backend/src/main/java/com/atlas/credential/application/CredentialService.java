@@ -118,6 +118,7 @@ public class CredentialService {
             throw conflict("CREDENTIAL_UPLOAD_EXPIRED", "Credential upload unavailable",
                     "The upload authorization is expired or already completed.");
         }
+
         CredentialStorage.StoredObject stored = storageCall(() -> storage.inspect(document.objectKey(), 2048));
         try {
             if (stored.sizeBytes() != document.declaredSizeBytes()
@@ -125,18 +126,47 @@ public class CredentialService {
                 reject(document, null, "ERROR", now);
                 throw invalidFile("The uploaded object size does not match the declared size.");
             }
+
             String detected = FileSignaturePolicy.detect(stored.prefix());
             if (!detected.equals(document.declaredMimeType())) {
                 reject(document, detected, "ERROR", now);
                 throw invalidFile("The uploaded file signature does not match its declared type.");
             }
-            MalwareScanner.ScanResult scan = malwareScanner.scan(stored.prefix());
-            if (scan == MalwareScanner.ScanResult.INFECTED) {
-                reject(document, detected, "INFECTED", now);
-                throw invalidFile("The uploaded file failed malware screening.");
+
+            byte[] content = storageCall(() ->
+                    storage.readAll(document.objectKey(), properties.maximumFileSize().toBytes()));
+
+            MalwareScanner.ScanOutcome outcome;
+            try {
+                outcome = malwareScanner.scan(content);
+            } catch (RuntimeException exception) {
+                outcome = MalwareScanner.ScanOutcome.error(
+                        "SCANNER_EXCEPTION",
+                        exception.getClass().getSimpleName() + ": " + safeDetail(exception.getMessage()));
             }
-            credentials.completeDocument(document.id(), stored.sizeBytes(), detected, "CLEAN", true, now);
-            return documentView(credentials.findDocument(document.id()).orElseThrow(CredentialService::documentNotFound));
+
+            if (CredentialScanPolicy.decide(outcome) == CredentialScanPolicy.Decision.ACCEPT) {
+                credentials.addScanEvent(document.id(), outcome.engine(), outcome.result().name(),
+                        safeDetail(outcome.detail()), content.length, null, now);
+                credentials.completeDocument(document.id(), stored.sizeBytes(), detected, "CLEAN", true, now);
+                return documentView(credentials.findDocument(document.id())
+                        .orElseThrow(CredentialService::documentNotFound));
+            }
+
+            reject(document, detected, outcome.result().name(), now);
+            String quarantinedKey = quarantineSafely(document.objectKey(), content);
+            String detail = safeDetail(outcome.detail());
+            if (quarantinedKey == null) {
+                detail = safeDetail((detail == null ? "" : detail + "; ") +
+                        "quarantine copy unavailable; original object deletion attempted");
+            }
+            credentials.addScanEvent(document.id(), outcome.engine(), outcome.result().name(),
+                    detail, content.length, quarantinedKey, now);
+
+            if (outcome.result() == MalwareScanner.ScanResult.INFECTED) {
+                throw invalidFile("The uploaded file failed malware screening and was quarantined.");
+            }
+            throw scanUnavailable();
         } catch (ApiProblemException exception) {
             safeDelete(document.objectKey());
             throw exception;
@@ -235,8 +265,23 @@ public class CredentialService {
         credentials.completeDocument(document.id(), document.declaredSizeBytes(), detectedMime, malwareStatus, false, now);
     }
 
+    private String quarantineSafely(String objectKey, byte[] content) {
+        try {
+            return storage.quarantine(objectKey, content);
+        } catch (CredentialStorageException exception) {
+            safeDelete(objectKey);
+            return null;
+        }
+    }
+
     private void safeDelete(String objectKey) {
         try { storage.delete(objectKey); } catch (CredentialStorageException ignored) { }
+    }
+
+    private static String safeDetail(String value) {
+        if (value == null || value.isBlank()) return null;
+        String cleaned = value.trim();
+        return cleaned.length() <= 1000 ? cleaned : cleaned.substring(0, 1000);
     }
 
     private static void validateDates(LocalDate issued, LocalDate expires) {
@@ -262,6 +307,12 @@ public class CredentialService {
 
     private static ApiProblemException invalidFile(String detail) {
         return new ApiProblemException(HttpStatus.BAD_REQUEST, "CREDENTIAL_FILE_INVALID", "Credential file rejected", detail);
+    }
+
+    private static ApiProblemException scanUnavailable() {
+        return new ApiProblemException(HttpStatus.SERVICE_UNAVAILABLE, "CREDENTIAL_SCAN_UNAVAILABLE",
+                "Credential malware scan unavailable",
+                "The credential document could not be safely scanned and was rejected.");
     }
     private static ApiProblemException credentialNotFound() {
         return new ApiProblemException(HttpStatus.NOT_FOUND, "CREDENTIAL_NOT_FOUND", "Credential not found",

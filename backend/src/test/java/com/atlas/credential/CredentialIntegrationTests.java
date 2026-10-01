@@ -155,6 +155,28 @@ class CredentialIntegrationTests {
         assertThat(jdbc.queryForObject(
                 "SELECT malware_status FROM credential_document_objects WHERE id = ?", String.class, infectedId))
                 .isEqualTo("INFECTED");
+
+        String quarantinedKey = jdbc.queryForObject("""
+                SELECT quarantined_object_key
+                  FROM credential_scan_events
+                 WHERE document_id = ? AND result = 'INFECTED'
+                 ORDER BY created_at DESC
+                 LIMIT 1
+                """, String.class, infectedId);
+        String originalKey = jdbc.queryForObject(
+                "SELECT object_key FROM credential_document_objects WHERE id = ?",
+                String.class, infectedId);
+        assertThat(quarantinedKey).startsWith("quarantine/");
+        assertThat(storage.contains(quarantinedKey)).isTrue();
+        assertThat(storage.contains(originalKey)).isFalse();
+
+        Integer scanEvents = jdbc.queryForObject("""
+                SELECT count(*) FROM credential_scan_events
+                 WHERE document_id = ? AND engine = 'LOCAL_EICAR_POLICY'
+                   AND result = 'INFECTED' AND scanned_bytes > 0
+                """, Integer.class, infectedId);
+        assertThat(scanEvents).isEqualTo(1);
+
         mvc.perform(post("/api/v1/workers/me/credentials/{id}/submit", credentialId)
                         .header("Authorization", worker.bearer()))
                 .andExpect(status().isConflict())
