@@ -23,7 +23,7 @@ public class ResilientRedisCache {
             if (cached != null) {
                 return json.readValue(cached, type);
             }
-        } catch (RuntimeException | JacksonException ignored) {
+        } catch (RuntimeException ignored) {
             // Redis is an optimization; source-of-truth reads must still succeed.
         }
 
@@ -31,7 +31,7 @@ public class ResilientRedisCache {
 
         try {
             redis.opsForValue().set(key, json.writeValueAsString(value), ttl);
-        } catch (RuntimeException | JacksonException ignored) {
+        } catch (RuntimeException ignored) {
             // Degrade cleanly when Redis is unavailable or serialization fails.
         }
 
