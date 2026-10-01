@@ -84,7 +84,7 @@ public class MinioCredentialStorage implements CredentialStorage {
             int limit = Math.toIntExact(Math.min(Integer.MAX_VALUE - 1L, maximumBytes + 1L));
             byte[] content = stream.readNBytes(limit);
             if (content.length > maximumBytes) {
-                throw new CredentialStorageException("Credential object exceeds configured scan limit.");
+                throw new CredentialStorageException("Credential object exceeds configured scan limit.", new IllegalStateException("scan limit exceeded"));
             }
             return content;
         } catch (CredentialStorageException exception) {
