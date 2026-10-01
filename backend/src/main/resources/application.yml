@@ -77,6 +77,13 @@ atlas:
     enabled: ${ATLAS_OPENSEARCH_ENABLED:false}
     endpoint: ${ATLAS_OPENSEARCH_ENDPOINT:http://localhost:9200}
     index: ${ATLAS_OPENSEARCH_INDEX:atlas-public-v1}
+  malware:
+    mode: ${ATLAS_MALWARE_MODE:local}
+    clamav:
+      host: ${ATLAS_CLAMAV_HOST:localhost}
+      port: ${ATLAS_CLAMAV_PORT:3310}
+      connect-timeout-ms: ${ATLAS_CLAMAV_CONNECT_TIMEOUT_MS:2000}
+      read-timeout-ms: ${ATLAS_CLAMAV_READ_TIMEOUT_MS:10000}
   credential-storage:
     enabled: ${ATLAS_CREDENTIAL_STORAGE_ENABLED:true}
     endpoint: ${ATLAS_MINIO_ENDPOINT:http://localhost:9000}
