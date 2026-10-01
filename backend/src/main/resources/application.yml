@@ -35,6 +35,15 @@ spring:
     properties:
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
+  kafka:
+    bootstrap-servers: ${ATLAS_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      properties:
+        enable.idempotence: true
+    consumer:
+      enable-auto-commit: false
+      auto-offset-reset: earliest
 
 springdoc:
   api-docs:
@@ -59,6 +68,11 @@ atlas:
     project-id: ${ATLAS_FIREBASE_PROJECT_ID:atlas-verified}
     credentials-path: ${ATLAS_FIREBASE_CREDENTIALS_PATH:}
     emulator-host: ${FIREBASE_AUTH_EMULATOR_HOST:}
+  kafka:
+    enabled: ${ATLAS_KAFKA_ENABLED:false}
+    topic: ${ATLAS_KAFKA_TOPIC:atlas.domain-events.v1}
+    consumer-group: ${ATLAS_KAFKA_CONSUMER_GROUP:atlas-core-v1}
+    publish-delay-ms: ${ATLAS_KAFKA_PUBLISH_DELAY_MS:1000}
   credential-storage:
     enabled: ${ATLAS_CREDENTIAL_STORAGE_ENABLED:true}
     endpoint: ${ATLAS_MINIO_ENDPOINT:http://localhost:9000}
