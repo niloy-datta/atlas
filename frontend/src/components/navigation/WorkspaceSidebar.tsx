@@ -7,9 +7,13 @@ import { useAuth } from "../../context/AuthContext";
 export default function WorkspaceSidebar() {
   const pathname = usePathname();
   const { atlasUser } = useAuth();
-  const dashboardHref = atlasUser?.roles?.some((role) => role.includes("EMPLOYER")) ? "/dashboard/employer" : "/dashboard/worker";
-  const menuItems = [
+  const isEmployer = atlasUser?.roles?.some((role) => role.includes("EMPLOYER")) ?? false;
+  const dashboardHref = isEmployer ? "/dashboard/employer" : "/dashboard/worker";
+  const menuItems: Array<readonly [string, string, string]> = [
     ["⌂", "Dashboard", dashboardHref],
+    ...(isEmployer
+      ? [["◎", "Workforce", "/workforce"] as const]
+      : [["◷", "Availability", "/availability"] as const]),
     ["⌕", "Find Work", "/jobs"],
     ["▣", "My Shifts", "/my-shifts"],
     ["♡", "Saved Jobs", "/jobs"],
@@ -19,7 +23,7 @@ export default function WorkspaceSidebar() {
     ["▥", "Earnings", "/earnings"],
     ["◫", "Career Growth", dashboardHref],
     ["⚙", "Settings", "/settings"],
-  ] as const;
+  ];
 
   const isActive = (href: string, label: string) => {
     if (label === "Saved Jobs") return false;

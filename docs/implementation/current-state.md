@@ -21,7 +21,7 @@ License: MIT
 | **MatchEngine V1** | `IMPLEMENTED` | Phase 13 deterministic ranking with explainable skill, verified-skill, distance, availability, and profile-completeness components. |
 | **Reservations** | `IMPLEMENTED` | Phase 14 shift reservations serialize capacity decisions with PostgreSQL row locks, enforce one active reservation per worker/shift, and support optimistic cancellation. |
 | **Idempotency** | `IMPLEMENTED` | Phase 15 reusable transactional idempotency records with request hashing, stored response replay, conflicting-payload detection, and concurrent retry coverage. |
-| **Frontend Applications** | `PRODUCTION-READY` | Next.js 16 App Router, React 19, Tailwind CSS. Integrated apply modals, worker invitation & application pipelines, employer applicant management dashboard. |
+| **Frontend Applications** | `EXPANDED` | Next.js 16 App Router, React 19, Tailwind CSS. Adds real workforce-pool operations, deterministic match review, idempotent shift reservation actions, and worker availability/override management on top of onboarding, jobs, shifts, and application flows. |
 | **CI / CD Automation** | `ACTIVE` | GitHub Actions CI workflow (`.github/workflows/ci.yml`) testing backend (Maven wrapper, JUnit 5) and frontend (lint, TypeScript check, Vitest 17 unit tests, Next.js production build). Automated GitHub Pages deployment (`.github/workflows/deploy-pages.yml`). |
 | **Verification Tooling** | `HARDENED` | Cross-platform `scripts/verify.ps1` runs native Maven & npm test suites without WSL path dependencies. |
 
@@ -36,3 +36,4 @@ License: MIT
 - **Phase 13**: Deterministic MatchEngine V1 with reproducible scoring, explainable breakdowns, and tenant-isolated match endpoints.
 - **Phase 14**: Concurrency-safe shift reservations with row-level locking and high-contention capacity tests.
 - **Phase 15**: Reusable Idempotency with request hashing, replayed responses, mismatch rejection, and concurrent retry tests.
+- **Phase 16 (partial)**: New workforce operations and worker availability pages connect Phases 10–15 to real frontend workflows; remaining demo/static surfaces are still tracked separately.

@@ -140,11 +140,11 @@ export async function searchJobs(params: {
   if (params.size !== undefined) q.set("size", params.size.toString());
 
   const queryStr = q.toString();
-  return atlasApi.get<PageResult<JobSummary>>(`/jobs${queryStr ? `?${queryStr}` : ""}`);
+  return atlasApi.get<PageResult<JobSummary>>(`/api/v1/jobs${queryStr ? `?${queryStr}` : ""}`);
 }
 
 export async function getPublicJob(jobId: string): Promise<JobDetail> {
-  return atlasApi.get<JobDetail>(`/jobs/${jobId}`);
+  return atlasApi.get<JobDetail>(`/api/v1/jobs/${jobId}`);
 }
 
 // Employer Organization Management
@@ -158,39 +158,39 @@ export async function listOrganizationJobs(
   if (params?.size !== undefined) q.set("size", params.size.toString());
 
   const queryStr = q.toString();
-  return atlasApi.get<PageResult<JobSummary>>(`/organizations/${organizationId}/jobs${queryStr ? `?${queryStr}` : ""}`);
+  return atlasApi.get<PageResult<JobSummary>>(`/api/v1/organizations/${organizationId}/jobs${queryStr ? `?${queryStr}` : ""}`);
 }
 
 export async function getOrganizationJob(organizationId: string, jobId: string): Promise<JobDetail> {
-  return atlasApi.get<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}`);
+  return atlasApi.get<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}`);
 }
 
 export async function createJobDraft(organizationId: string, req: CreateJobDraftRequest): Promise<JobDetail> {
-  return atlasApi.post<JobDetail>(`/organizations/${organizationId}/jobs`, req);
+  return atlasApi.post<JobDetail>(`/api/v1/organizations/${organizationId}/jobs`, req);
 }
 
 export async function updateJobDraft(organizationId: string, jobId: string, req: UpdateJobDraftRequest): Promise<JobDetail> {
-  return atlasApi.put<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}`, req);
+  return atlasApi.put<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}`, req);
 }
 
 export async function publishJob(organizationId: string, jobId: string, version: number): Promise<JobDetail> {
-  return atlasApi.post<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/publish`, { version });
+  return atlasApi.post<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/publish`, { version });
 }
 
 export async function pauseJob(organizationId: string, jobId: string, version: number): Promise<JobDetail> {
-  return atlasApi.post<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/pause`, { version });
+  return atlasApi.post<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/pause`, { version });
 }
 
 export async function resumeJob(organizationId: string, jobId: string, version: number): Promise<JobDetail> {
-  return atlasApi.post<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/resume`, { version });
+  return atlasApi.post<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/resume`, { version });
 }
 
 export async function closeJob(organizationId: string, jobId: string, version: number): Promise<JobDetail> {
-  return atlasApi.post<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/close`, { version });
+  return atlasApi.post<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/close`, { version });
 }
 
 export async function cancelJob(organizationId: string, jobId: string, version: number): Promise<JobDetail> {
-  return atlasApi.post<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/cancel`, { version });
+  return atlasApi.post<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/cancel`, { version });
 }
 
 export async function addJobSkillRequirement(
@@ -198,7 +198,7 @@ export async function addJobSkillRequirement(
   jobId: string,
   req: AddJobSkillRequest
 ): Promise<JobDetail> {
-  return atlasApi.post<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/skills`, req);
+  return atlasApi.post<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/skills`, req);
 }
 
 export async function removeJobSkillRequirement(
@@ -206,7 +206,7 @@ export async function removeJobSkillRequirement(
   jobId: string,
   skillId: string
 ): Promise<JobDetail> {
-  return atlasApi.delete<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/skills/${skillId}`);
+  return atlasApi.delete<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/skills/${skillId}`);
 }
 
 export async function addJobCredentialRequirement(
@@ -214,7 +214,7 @@ export async function addJobCredentialRequirement(
   jobId: string,
   req: AddJobCredentialRequest
 ): Promise<JobDetail> {
-  return atlasApi.post<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/credentials`, req);
+  return atlasApi.post<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/credentials`, req);
 }
 
 export async function removeJobCredentialRequirement(
@@ -222,6 +222,6 @@ export async function removeJobCredentialRequirement(
   jobId: string,
   credentialRequirementId: string
 ): Promise<JobDetail> {
-  return atlasApi.delete<JobDetail>(`/organizations/${organizationId}/jobs/${jobId}/credentials/${credentialRequirementId}`);
+  return atlasApi.delete<JobDetail>(`/api/v1/organizations/${organizationId}/jobs/${jobId}/credentials/${credentialRequirementId}`);
 }
 

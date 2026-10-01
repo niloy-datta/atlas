@@ -106,6 +106,17 @@ export const atlasApi = {
       requireAuth,
     ),
 
+  postWithHeaders: <T>(path: string, body: unknown, headers: Record<string, string>, requireAuth = true) =>
+    request<T>(
+      path,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      },
+      requireAuth,
+    ),
+
   put: <T>(path: string, body?: unknown, requireAuth = true) =>
     request<T>(
       path,

@@ -144,11 +144,11 @@ export async function searchShifts(params: SearchShiftsParams = {}): Promise<Pag
   if (params.size !== undefined) q.set("size", params.size.toString());
 
   const queryStr = q.toString();
-  return atlasApi.get<PageResult<ShiftSummaryView>>(`/shifts${queryStr ? `?${queryStr}` : ""}`);
+  return atlasApi.get<PageResult<ShiftSummaryView>>(`/api/v1/shifts${queryStr ? `?${queryStr}` : ""}`);
 }
 
 export async function getPublicShift(shiftId: string): Promise<ShiftDetailView> {
-  return atlasApi.get<ShiftDetailView>(`/shifts/${shiftId}`);
+  return atlasApi.get<ShiftDetailView>(`/api/v1/shifts/${shiftId}`);
 }
 
 export async function listOrganizationShifts(
@@ -164,35 +164,35 @@ export async function listOrganizationShifts(
   if (params.size !== undefined) q.set("size", params.size.toString());
 
   const queryStr = q.toString();
-  return atlasApi.get<PageResult<ShiftSummaryView>>(`/organizations/${orgId}/shifts${queryStr ? `?${queryStr}` : ""}`);
+  return atlasApi.get<PageResult<ShiftSummaryView>>(`/api/v1/organizations/${orgId}/shifts${queryStr ? `?${queryStr}` : ""}`);
 }
 
 export async function getOrganizationShift(orgId: string, shiftId: string): Promise<ShiftDetailView> {
-  return atlasApi.get<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}`);
+  return atlasApi.get<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}`);
 }
 
 export async function createShiftDraft(orgId: string, payload: CreateShiftDraftPayload): Promise<ShiftDetailView> {
-  return atlasApi.post<ShiftDetailView>(`/organizations/${orgId}/shifts`, payload);
+  return atlasApi.post<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts`, payload);
 }
 
 export async function updateShiftDraft(orgId: string, shiftId: string, payload: UpdateShiftDraftPayload): Promise<ShiftDetailView> {
-  return atlasApi.put<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}`, payload);
+  return atlasApi.put<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}`, payload);
 }
 
 export async function publishShift(orgId: string, shiftId: string, version: number): Promise<ShiftDetailView> {
-  return atlasApi.post<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}/publish`, { version });
+  return atlasApi.post<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}/publish`, { version });
 }
 
 export async function startShift(orgId: string, shiftId: string, version: number): Promise<ShiftDetailView> {
-  return atlasApi.post<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}/start`, { version });
+  return atlasApi.post<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}/start`, { version });
 }
 
 export async function completeShift(orgId: string, shiftId: string, version: number): Promise<ShiftDetailView> {
-  return atlasApi.post<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}/complete`, { version });
+  return atlasApi.post<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}/complete`, { version });
 }
 
 export async function cancelShift(orgId: string, shiftId: string, version: number): Promise<ShiftDetailView> {
-  return atlasApi.post<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}/cancel`, { version });
+  return atlasApi.post<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}/cancel`, { version });
 }
 
 export async function addShiftSkillRequirement(
@@ -200,11 +200,11 @@ export async function addShiftSkillRequirement(
   shiftId: string,
   payload: { skillId: string; minimumProficiency: SkillProficiency; required?: boolean }
 ): Promise<ShiftDetailView> {
-  return atlasApi.post<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}/skills`, payload);
+  return atlasApi.post<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}/skills`, payload);
 }
 
 export async function removeShiftSkillRequirement(orgId: string, shiftId: string, skillId: string): Promise<ShiftDetailView> {
-  return atlasApi.delete<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}/skills/${skillId}`);
+  return atlasApi.delete<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}/skills/${skillId}`);
 }
 
 export async function addShiftCredentialRequirement(
@@ -212,7 +212,7 @@ export async function addShiftCredentialRequirement(
   shiftId: string,
   payload: { credentialType: "CERTIFICATE" | "LICENSE" | "PERMIT" | "OTHER"; title: string; issuer?: string; required?: boolean }
 ): Promise<ShiftDetailView> {
-  return atlasApi.post<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}/credentials`, payload);
+  return atlasApi.post<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}/credentials`, payload);
 }
 
 export async function removeShiftCredentialRequirement(
@@ -220,5 +220,5 @@ export async function removeShiftCredentialRequirement(
   shiftId: string,
   reqId: string
 ): Promise<ShiftDetailView> {
-  return atlasApi.delete<ShiftDetailView>(`/organizations/${orgId}/shifts/${shiftId}/credentials/${reqId}`);
+  return atlasApi.delete<ShiftDetailView>(`/api/v1/organizations/${orgId}/shifts/${shiftId}/credentials/${reqId}`);
 }
