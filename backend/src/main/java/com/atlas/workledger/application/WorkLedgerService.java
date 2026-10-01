@@ -6,9 +6,10 @@ import com.atlas.workledger.infrastructure.WorkLedgerRepository.LedgerEntry;
 import com.atlas.workledger.infrastructure.WorkLedgerRepository.WorkerProjection;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,8 @@ public class WorkLedgerService {
 
         outbox.append(
                 "WORK_LEDGER",
-                entry.id(),
+                workerUserId,
+                entry.sequenceNo(),
                 "workledger." + eventType.toLowerCase(Locale.ROOT) + ".v1",
                 payload(entry),
                 now);
@@ -61,14 +63,16 @@ public class WorkLedgerService {
 
     private String payload(LedgerEntry entry) {
         try {
-            return json.writeValueAsString(Map.of(
-                    "ledgerEntryId", entry.id(),
-                    "workerUserId", entry.workerUserId(),
-                    "organizationId", entry.organizationId(),
-                    "shiftId", entry.shiftId(),
-                    "reservationId", entry.reservationId(),
-                    "eventType", entry.eventType(),
-                    "occurredAt", entry.occurredAt()));
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("ledgerEntryId", entry.id());
+            payload.put("sequenceNo", entry.sequenceNo());
+            payload.put("workerUserId", entry.workerUserId());
+            payload.put("organizationId", entry.organizationId());
+            payload.put("shiftId", entry.shiftId());
+            payload.put("reservationId", entry.reservationId());
+            payload.put("eventType", entry.eventType());
+            payload.put("occurredAt", entry.occurredAt());
+            return json.writeValueAsString(payload);
         } catch (JacksonException exception) {
             throw new IllegalStateException("Could not serialize work ledger outbox event", exception);
         }
