@@ -38,7 +38,7 @@ class AtlasBackendApplicationTests {
 				Integer.class);
 
 		assertThat(postgisVersion).isNotBlank();
-		assertThat(schemaVersion).isEqualTo(13);
+		assertThat(schemaVersion).isEqualTo(14);
 	}
 
 	@Test
